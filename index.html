@@ -1,0 +1,1025 @@
+```html
+<!DOCTYPE html>
+<html lang="km" data-theme="light" data-lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Café Management System</title>
+<!-- Tailwind CSS for modern responsive utility design -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- FontAwesome for robust, semantic business iconography -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- ChartJS for visual analytics & data representations -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Leaflet CSS & JS for physical branch location mappings -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Google Fonts for legible Khmer language layout rendering -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700;900&family=Suwannaphum:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script>
+tailwind.config={
+  darkMode:'class',
+  theme:{
+    extend:{
+      colors:{
+        brand:{
+          50: 'var(--brand-50, #f0fdf4)',
+          100: 'var(--brand-100, #dcfce7)',
+          200: 'var(--brand-200, #bbf7d0)',
+          500: 'var(--brand-500, #22c55e)',
+          600: 'var(--brand-600, #16a34a)',
+          700: 'var(--brand-700, #15803d)',
+          800: 'var(--brand-800, #166534)',
+          900: 'var(--brand-900, #14532d)'
+        }
+      }
+    }
+  }
+}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8fafc;--card:#ffffff;--border:#e2e8f0;--text:#0f172a;--text2:#475569;--text3:#94a3b8;
+  --brand-50: #f0fdf4;
+  --brand-100: #dcfce7;
+  --brand-200: #bbf7d0;
+  --brand-500: #22c55e;
+  --brand-600: #16a34a;
+  --brand-700: #15803d;
+  --brand-800: #166534;
+  --brand-900: #14532d;
+  --brand: var(--brand-600);
+  --brand-light: var(--brand-50);
+  --brand-dark: var(--brand-900);
+  --accent:#f59e0b;--danger:#ef4444;--info:#3b82f6;--purple:#8b5cf6;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 40px rgba(0,0,0,.12);
+  --radius:16px;--radius-sm:10px;--radius-lg:24px;
+}
+.dark{
+  --bg:#0a0f0d;--card:#111917;--border:#1e2d24;--text:#e2e8f0;--text2:#94a3b8;--text3:#475569;
+  --shadow:0 1px 3px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);
+  --shadow-lg:0 10px 40px rgba(0,0,0,.5);
+}
+body{font-family:'Hanuman',serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);transition:background .3s,border-color .3s}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.2rem;border-radius:var(--radius-sm);font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;border:none;outline:none}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 4px 12px rgba(22,163,74,.35)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{filter:brightness(1.1)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{background:var(--brand-light);border-color:var(--brand);color:var(--brand)}
+.btn-tg{background:#0088cc;color:#fff}
+.btn-tg:hover{background:#006699}
+.btn-amber{background:#f59e0b;color:#fff}
+.btn-amber:hover{filter:brightness(1.1)}
+input,select,textarea{background:var(--bg);border:1.5px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:.65rem 1rem;font-family:inherit;font-size:.9rem;outline:none;transition:border-color .2s,background .3s}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(22,163,74,.15)}
+
+.sidebar{width:260px;background:var(--card);border-right:1.5px solid var(--border);display:flex;flex-direction:column;height:100vh;position:fixed;left:0;top:0;z-index:200;transition:transform .3s ease}
+.sidebar-logo{padding:1.5rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem}
+.sidebar-menu{flex:1;overflow-y:auto;padding:1rem .75rem;display:flex;flex-direction:column;gap:.25rem}
+.tab-btn{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;font-size:.85rem;font-weight:700;color:var(--text2);cursor:pointer;border:none;background:transparent;border-radius:var(--radius-sm);transition:all .2s;font-family:inherit;text-align:left;width:100%}
+.tab-btn i{font-size:1.1rem;width:20px;text-align:center}
+.tab-btn.active{color:#fff;background:var(--brand);box-shadow:0 4px 12px rgba(22,163,74,.25)}
+.tab-btn:hover:not(.active){color:var(--brand);background:var(--brand-light)}
+
+.main-content{margin-left:260px;min-height:100vh;display:flex;flex-direction:column;transition:margin-left .3s ease}
+.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;backdrop-filter:blur(2px)}
+
+@media(max-width:1023px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main-content{margin-left:0}
+  .mobile-overlay.open{display:block}
+}
+
+#toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;pointer-events:none}
+.toast{display:flex;align-items:center;gap:.75rem;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:.8rem 1.1rem;box-shadow:var(--shadow-lg);min-width:260px;font-size:.875rem;font-weight:700;pointer-events:auto;border-left:4px solid var(--brand)}
+.toast.success{border-left-color:#22c55e}.toast.error{border-left-color:#ef4444}.toast.warning{border-left-color:#f59e0b}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1rem}
+.modal-box{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:480px;overflow:hidden;border:1px solid var(--border)}
+.modal-header{padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.modal-body{padding:1.5rem}
+
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .65rem;border-radius:99px;font-size:.72rem;font-weight:800;border:1px solid transparent}
+.badge-green{background:#dcfce7;color:#166534;border-color:#bbf7d0}
+.badge-red{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+.badge-amber{background:#fef3c7;color:#92400e;border-color:#fde68a}
+.badge-blue{background:#dbeafe;color:#1e40af;border-color:#bfdbfe}
+.badge-purple{background:#ede9fe;color:#5b21b6;border-color:#ddd6fe}
+.badge-gray{background:var(--bg);color:var(--text2);border-color:var(--border)}
+.dark .badge-green{background:#0d2d1a;color:#4ade80;border-color:#166534}
+.dark .badge-red{background:#2d0d0d;color:#f87171;border-color:#7f1d1d}
+.dark .badge-amber{background:#2d1f00;color:#fbbf24;border-color:#78350f}
+.dark .badge-blue{background:#0d1a2d;color:#60a5fa;border-color:#1e3a5f}
+
+.scan-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:2rem;max-width:360px;width:100%;text-align:center}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1rem;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--c,var(--brand))}
+.stat-val{font-size:2rem;font-weight:900;line-height:1}
+.stat-label{font-size:.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
+.staff-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;transition:all .2s}
+.staff-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:var(--brand)}
+.log-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;transition:box-shadow .2s}
+.log-item:hover{box-shadow:var(--shadow)}
+.pulse-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite;display:inline-block}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+.scroll-y{overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.scroll-y::-webkit-scrollbar{width:5px}
+.scroll-y::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+#map{height:250px;border-radius:var(--radius);z-index:1}
+.section{display:none !important}
+.section.active{display:block !important}
+.chart-wrap{position:relative;height:260px}
+.notif-badge{position:absolute;top:4px;right:4px;background:#ef4444;color:#fff;border-radius:99px;font-size:.6rem;font-weight:900;padding:1px 5px;min-width:16px;text-align:center;line-height:16px}
+.cat-tag{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .55rem;border-radius:6px;font-size:.7rem;font-weight:700}
+[data-lang="en"] .t-km{display:none}
+[data-lang="km"] .t-en{display:none}
+#loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999}
+.spinner{width:48px;height:48px;border:4px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+input[type=range]{accent-color:var(--brand)}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;flex-shrink:0}
+.grid-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem}
+@media(min-width:640px){.grid-stats{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1024px){.grid-stats{grid-template-columns:repeat(5,1fr)}}
+.grid-staff{display:grid;grid-template-columns:1fr;gap:1rem}
+@media(min-width:640px){.grid-staff{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.grid-staff{grid-template-columns:repeat(3,1fr)}}
+header{background:linear-gradient(135deg,var(--brand-dark) 0%,var(--brand) 100%);color:#fff;padding:1rem 1.25rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(22,163,74,.3)}
+.notif-panel{position:fixed;top:60px;right:1rem;width:320px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:500;max-height:400px;overflow:hidden;display:flex;flex-direction:column}
+.file-drop{border:2px dashed var(--border);border-radius:var(--radius);padding:2rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}
+.file-drop:hover{border-color:var(--brand);background:var(--brand-light)}
+.qr-wrap{background:white;padding:1rem;border-radius:var(--radius);display:flex;justify-content:center}
+.divider{height:1px;background:var(--border);margin:.75rem 0}
+
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-cell{min-height:72px;border-radius:8px;padding:4px;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:all .15s;position:relative}
+.cal-cell:hover{border-color:var(--brand);background:var(--brand-light)}
+.cal-cell.other-month{opacity:.35}
+.cal-cell.today{border-color:var(--brand);background:var(--brand-light)}
+.cal-cell.has-dayoff{border-color:#8b5cf6}
+.cal-cell.has-shift{border-color:#3b82f6}
+.cal-cell.selected{border-color:var(--brand) !important;box-shadow:0 0 0 3px rgba(22,163,74,.25);background:var(--brand-light)}
+.cal-day-num{font-size:.7rem;font-weight:900;color:var(--text3);margin-bottom:2px}
+.cal-cell.today .cal-day-num{color:var(--brand);font-size:.8rem}
+.cal-chip{font-size:.58rem;font-weight:700;padding:1px 4px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;display:block}
+.cal-chip.off{background:#ede9fe;color:#5b21b6}
+.cal-chip.shift{background:#dbeafe;color:#1e40af}
+.cal-chip.late{background:#fee2e2;color:#991b1b}
+.dark .cal-chip.off{background:#1a0d2d;color:#a78bfa}
+.dark .cal-chip.shift{background:#0d1a2d;color:#60a5fa}
+.dark .cal-chip.late{background:#2d0d0d;color:#f87171}
+.cal-header-day{text-align:center;font-size:.7rem;font-weight:900;color:var(--text3);padding:.35rem 0;text-transform:uppercase}
+
+.shift-row{display:grid;grid-template-columns:140px repeat(7,1fr);gap:3px;margin-bottom:3px}
+.shift-name{font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:.4rem;padding:.3rem .5rem;border-radius:8px;background:var(--bg);border:1px solid var(--border)}
+.shift-slot{min-height:40px;border-radius:8px;border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.7rem;font-weight:700;transition:all .2s;position:relative}
+.shift-slot.work{background:#dcfce7;border-color:#22c55e;color:#166534}
+.shift-slot.off{background:#ede9fe;border-color:#8b5cf6;color:#5b21b6}
+.shift-slot.leave{background:#fef3c7;border-color:#f59e0b;color:#92400e}
+.dark .shift-slot.work{background:#0d2d1a;border-color:#22c55e;color:#4ade80}
+.dark .shift-slot.off{background:#1a0d2d;border-color:#8b5cf6;color:#a78bfa}
+.dark .shift-slot.leave{background:#2d1f00;border-color:#f59e0b;color:#fbbf24}
+
+.doc-card { cursor: pointer; transition: all 0.2s; }
+.doc-card:hover { transform: translateY(-3px); border-color: var(--brand); box-shadow: var(--shadow-lg); }
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+<div id="loading-screen">
+  <div class="spinner mb-4"></div>
+  <span style="color:var(--brand);font-weight:900;font-size:1.1rem" class="t-km">កំពុងផ្ទុក...</span>
+  <span style="color:var(--brand);font-weight:900;font-size:1.1rem" class="t-en">Loading...</span>
+</div>
+
+<!-- SCAN SCREEN -->
+<div id="scan-view" style="display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;background:linear-gradient(135deg,#0a1f10 0%,#0d2d1a 50%,#14532d 100%)">
+  <div style="margin-bottom:1.5rem;text-align:center">
+    <i class="fa-solid fa-mug-hot" style="font-size:3rem;color:#4ade80;margin-bottom:.5rem"></i>
+    <div style="color:#4ade80;font-weight:900;font-size:1.2rem">Café Management</div>
+  </div>
+  <div id="scan-status" class="scan-card"></div>
+</div>
+
+<!-- ADMIN SCREEN -->
+<div id="admin-view" style="display:none;flex-direction:row;min-height:100vh">
+  
+  <div id="mobile-overlay" class="mobile-overlay" onclick="toggleSidebar(false)"></div>
+
+  <!-- LEFT RESPONSIVE SIDEBAR -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-logo">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--brand-light);display:flex;align-items:center;justify-content:center;color:var(--brand);font-size:1.2rem;flex-shrink:0">
+        <i class="fa-solid fa-mug-hot"></i>
+      </div>
+      <div>
+        <div style="font-weight:900;font-size:1rem;color:var(--brand)" class="t-km" id="brand-title-kh">ហាងកាហ្វេ Admin</div>
+        <div style="font-weight:900;font-size:1rem;color:var(--brand)" class="t-en" id="brand-title-en">Café Admin</div>
+        <div id="live-clock" style="font-size:.65rem;color:var(--text3);margin-top:2px;font-weight:600"></div>
+      </div>
+    </div>
+    
+    <nav class="sidebar-menu scroll-y">
+      <button class="tab-btn active" onclick="switchTab('dashboard')" id="tab-dashboard">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span class="t-km">ទិដ្ឋភាព</span><span class="t-en">Dashboard</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('logs')" id="tab-logs">
+        <i class="fa-solid fa-list-check"></i>
+        <span class="t-km">វត្តមាន</span><span class="t-en">Logs</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('staff')" id="tab-staff">
+        <i class="fa-solid fa-users"></i>
+        <span class="t-km">បុគ្គលិក</span><span class="t-en">Staff</span>
+      </button>
+      <!-- NEW STAFF LIST MENU (STAFF DIRECTORY) -->
+      <button class="tab-btn" onclick="switchTab('stafflist')" id="tab-stafflist">
+        <i class="fa-solid fa-clipboard-list"></i>
+        <span class="t-km">បញ្ជីឈ្មោះបុគ្គលិក</span><span class="t-en">Staff List</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('categories')" id="tab-categories">
+        <i class="fa-solid fa-layer-group"></i>
+        <span class="t-km">ប្រភេទ</span><span class="t-en">Dept</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('payroll')" id="tab-payroll">
+        <i class="fa-solid fa-file-invoice-dollar"></i>
+        <span class="t-km">ប្រាក់ខែ</span><span class="t-en">Payroll</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('calendar')" id="tab-calendar">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span class="t-km">ប្រតិទិន</span><span class="t-en">Calendar</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('dayoffroster')" id="tab-dayoffroster">
+        <i class="fa-solid fa-umbrella-beach"></i>
+        <span class="t-km">បញ្ជីថ្ងៃសម្រាក</span><span class="t-en">Day-Off Roster</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('planner')" id="tab-planner">
+        <i class="fa-solid fa-table-columns"></i>
+        <span class="t-km">វេន</span><span class="t-en">Shifts</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('analytics')" id="tab-analytics">
+        <i class="fa-solid fa-chart-line"></i>
+        <span class="t-km">វិភាគ</span><span class="t-en">Analytics</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('documents')" id="tab-documents">
+        <i class="fa-solid fa-folder-open"></i>
+        <span class="t-km">ឯកសារ</span><span class="t-en">Docs</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('bot')" id="tab-bot">
+        <i class="fa-solid fa-robot"></i><span>Bot</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('settings')" id="tab-settings">
+        <i class="fa-solid fa-gear"></i>
+        <span class="t-km">ការកំណត់</span><span class="t-en">Settings</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <div class="main-content flex-1">
+    
+    <header class="w-full flex justify-between items-center px-4 py-3 bg-gradient-to-r from-brand-800 to-brand-500 shadow-md">
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button onclick="toggleSidebar(true)" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer" class="lg:hidden">
+          <i class="fa-solid fa-bars" style="font-size:1.1rem"></i>
+        </button>
+        <div class="text-white font-black text-sm lg:text-base">
+          <span class="t-km" id="header-title-kh">ប្រព័ន្ធគ្រប់គ្រងវត្តមានបុគ្គលិក</span>
+          <span class="t-en" id="header-title-en">Staff Attendance Dashboard</span>
+        </div>
+      </div>
+      
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <button onclick="toggleNotifPanel()" style="position:relative;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer" id="notif-bell">
+          <i class="fa-solid fa-bell" style="font-size:.9rem"></i>
+          <span id="notif-count" class="notif-badge" style="display:none">0</span>
+        </button>
+        <button onclick="toggleLang()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;padding:.35rem .7rem;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.3rem">
+          <i class="fa-solid fa-language"></i><span id="lang-label">EN</span>
+        </button>
+        <button onclick="toggleDark()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer" id="dark-btn">
+          <i class="fa-solid fa-moon" style="font-size:.9rem"></i>
+        </button>
+        <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.15);color:#fff;padding:.3rem .7rem;border-radius:99px;font-size:.72rem;font-weight:700;display:flex;align-items:center;gap:.4rem" class="hidden sm:flex">
+          <div class="pulse-dot"></div>Live
+        </div>
+      </div>
+    </header>
+
+    <!-- NOTIFICATION POP PANEL -->
+    <div id="notif-panel" class="notif-panel" style="display:none">
+      <div style="padding:1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-weight:900" class="t-km">ការជូនដំណឹង</span><span style="font-weight:900" class="t-en">Notifications</span>
+        <button onclick="clearNotifications()" style="font-size:.75rem;color:var(--danger);font-weight:700;background:none;border:none;cursor:pointer">Clear All</button>
+      </div>
+      <div id="notif-list" class="scroll-y" style="flex:1;padding:.75rem"></div>
+    </div>
+
+    <!-- MAIN BODY SECTION -->
+    <main style="flex:1;padding:1.5rem;max-width:1200px;margin:0 auto;width:100%">
+
+      <!-- ════ DASHBOARD TAB ════ -->
+      <div id="section-dashboard" class="section active">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.75rem;margin-bottom:1rem">
+          <div>
+            <h2 style="font-size:1.4rem;font-weight:900" class="t-km">ទិដ្ឋភាពរួម</h2>
+            <h2 style="font-size:1.4rem;font-weight:900" class="t-en">Overview</h2>
+            <p style="color:var(--text3);font-size:.8rem" id="today-date-label"></p>
+          </div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="openAnnounceModal()">
+              <i class="fa-solid fa-bullhorn"></i>
+              <span class="t-km">ប្រកាសព័ត៌មាន</span><span class="t-en">Announcement</span>
+            </button>
+            <button class="btn btn-ghost" onclick="openDayoffModal()"><i class="fa-solid fa-umbrella-beach"></i>
+              <span class="t-km">កំណត់ថ្ងៃឈប់</span><span class="t-en">Day Off</span>
+            </button>
+            <button class="btn btn-primary" onclick="broadcastDailySummary()"><i class="fa-brands fa-telegram"></i>
+              <span class="t-km">ផ្ញើសង្ខេប</span><span class="t-en">Send Summary</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="grid-stats" style="margin-bottom:1rem">
+          <div class="stat-card" style="--c:#3b82f6">
+            <div class="stat-label t-km">បុគ្គលិកសរុប</div><div class="stat-label t-en">Total Staff</div>
+            <div class="stat-val" id="s-total">0</div>
+          </div>
+          <div class="stat-card" style="--c:#22c55e">
+            <div class="stat-label t-km">មកធ្វើការ</div><div class="stat-label t-en">Present</div>
+            <div class="stat-val" style="color:#22c55e" id="s-present">0</div>
+          </div>
+          <div class="stat-card" style="--c:#f59e0b">
+            <div class="stat-label t-km">អវត្តមាន</div><div class="stat-label t-en">Absent</div>
+            <div class="stat-val" style="color:#f59e0b" id="s-absent">0</div>
+          </div>
+          <div class="stat-card" style="--c:#ef4444">
+            <div class="stat-label t-km">មកយឺត</div><div class="stat-label t-en">Late</div>
+            <div class="stat-val" style="color:#ef4444" id="s-late">0</div>
+          </div>
+          <div class="stat-card" style="--c:#8b5cf6">
+            <div class="stat-label t-km">ចេញមុន</div><div class="stat-label t-en">Early Out</div>
+            <div class="stat-val" style="color:#8b5cf6" id="s-early">0</div>
+          </div>
+        </div>
+
+        <!-- BEST STAFF -->
+        <div class="card" style="padding:1.25rem;margin-bottom:1rem;background:linear-gradient(135deg,var(--brand-light),var(--card))">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+            <h3 style="font-weight:900;display:flex;align-items:center;gap:.5rem"><i class="fa-solid fa-trophy" style="color:#f59e0b"></i>
+              <span class="t-km">បុគ្គលិកល្អបំផុតប្រចាំខែ</span><span class="t-en">Best Staff of Month</span>
+            </h3>
+            <button class="btn btn-tg" onclick="broadcastBestStaff()" style="padding:.4rem .8rem;font-size:.75rem"><i class="fa-brands fa-telegram"></i></button>
+          </div>
+          <div id="best-staff-display" style="color:var(--text2);font-size:.9rem"></div>
+        </div>
+
+        <!-- PERFORMANCE TABLE -->
+        <div class="card" style="padding:1.25rem;margin-bottom:1rem">
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:.5rem">
+            <h3 style="font-weight:900"><i class="fa-solid fa-star" style="color:#f59e0b;margin-right:.4rem"></i>
+              <span class="t-km">ការវាយតម្លៃ</span><span class="t-en">Performance</span>
+            </h3>
+            <div style="display:flex;gap:.5rem">
+              <button class="btn btn-ghost" onclick="broadcastPerformance('week')" style="font-size:.75rem;padding:.4rem .8rem"><i class="fa-brands fa-telegram"></i>Week</button>
+              <button class="btn btn-ghost" onclick="broadcastPerformance('month')" style="font-size:.75rem;padding:.4rem .8rem"><i class="fa-brands fa-telegram"></i>Month</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:.875rem">
+              <thead><tr style="background:var(--bg)">
+                <th style="padding:.65rem 1rem;text-align:left;color:var(--text3);font-weight:700;font-size:.75rem" class="t-km">បុគ្គលិក</th>
+                <th style="padding:.65rem 1rem;text-align:left;color:var(--text3);font-weight:700;font-size:.75rem" class="t-en">Staff</th>
+                <th style="padding:.65rem 1rem;text-align:left;color:var(--text3);font-weight:700;font-size:.75rem">Dept</th>
+                <th style="padding:.65rem 1rem;text-align:left;color:var(--text3);font-weight:700;font-size:.75rem">Week</th>
+                <th style="padding:.65rem 1rem;text-align:left;color:var(--text3);font-weight:700;font-size:.75rem">Month</th>
+                <th style="padding:.65rem 1rem;text-align:left;color:var(--text3);font-weight:700;font-size:.75rem">Rating</th>
+              </tr></thead>
+              <tbody id="perf-tbody" style="border-top:1px solid var(--border)"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- LIVE FEED -->
+        <div class="card" style="overflow:hidden">
+          <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+            <h3 style="font-weight:900"><i class="fa-solid fa-bolt" style="color:#f59e0b;margin-right:.4rem"></i>
+              <span class="t-km">សកម្មភាពបច្ចុប្បន្ន</span><span class="t-en">Live Feed</span>
+            </h3>
+            <button class="btn btn-ghost" onclick="switchTab('logs')" style="font-size:.75rem;padding:.35rem .8rem">View All</button>
+          </div>
+          <div id="dashboard-feed" style="padding:1.1rem;display:flex;flex-direction:column;gap:.6rem"></div>
+        </div>
+      </div>
+
+      <!-- ════ LOGS TAB ════ -->
+      <div id="section-logs" class="section">
+        <div class="card" style="padding:1.25rem">
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">
+            <h2 style="font-weight:900;font-size:1.1rem"><i class="fa-solid fa-clock-rotate-left" style="color:var(--brand);margin-right:.4rem"></i>
+              <span class="t-km">កំណត់ត្រាវត្តមាន</span><span class="t-en">Attendance Logs</span>
+            </h2>
+            <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center">
+              <input type="text" id="log-search" placeholder="🔍 Search..." style="width:160px" oninput="renderLogs()">
+              <input type="date" id="log-date" onchange="renderLogs()" style="width:150px">
+              <select id="log-sort" onchange="renderLogs()" style="width:140px">
+                <option value="time-desc">Newest First</option>
+                <option value="time-asc">Oldest First</option>
+                <option value="name-asc">Name A-Z</option>
+              </select>
+              <button class="btn btn-primary" onclick="openManualLogModal()">
+                <i class="fa-solid fa-hand-pointer"></i>
+                <span class="t-km">បញ្ចូលដោយដៃ</span><span class="t-en">Manual Log</span>
+              </button>
+              <button class="btn btn-ghost" onclick="exportLogsCSV()" style="font-size:.78rem;padding:.4rem .8rem"><i class="fa-solid fa-file-csv"></i>CSV</button>
+              <button class="btn btn-danger" onclick="deleteSelectedLogs()" id="btn-del-logs" style="font-size:.78rem;padding:.4rem .8rem" disabled><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+            <label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:700;cursor:pointer">
+              <input type="checkbox" id="sel-all-logs" onchange="toggleAllLogs(this)"> Select All
+            </label>
+            <span id="log-count" style="color:var(--text3);font-size:.8rem"></span>
+          </div>
+          <div id="logs-container" class="scroll-y" style="display:flex;flex-direction:column;gap:.6rem;max-height:65vh"></div>
+        </div>
+      </div>
+
+      <!-- ════ STAFF TAB ════ -->
+      <div id="section-staff" class="section">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:.5rem">
+          <h2 style="font-weight:900;font-size:1.1rem"><i class="fa-solid fa-users" style="color:var(--brand);margin-right:.4rem"></i>
+            <span class="t-km">គ្រប់គ្រងបុគ្គលិក</span><span class="t-en">Manage Staff</span>
+          </h2>
+          <div style="display:flex;gap:.5rem;align-items:center">
+            <select id="staff-dept-filter" onchange="renderStaff()" style="width:140px"><option value="">All Depts</option></select>
+            <input type="text" id="staff-search" placeholder="🔍 Search..." style="width:160px" oninput="renderStaff()">
+            <button class="btn btn-primary" onclick="openStaffModal()"><i class="fa-solid fa-user-plus"></i>Add</button>
+          </div>
+        </div>
+        <div id="staff-grid" class="grid-staff"></div>
+      </div>
+
+      <!-- ════ NEW STAFF LIST TAB (STAFF ROSTER DIRECTORY) ════ -->
+      <div id="section-stafflist" class="section">
+        <div class="card p-5 mb-4">
+          <div class="flex justify-between items-center flex-wrap gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <h2 class="text-lg font-black"><i class="fa-solid fa-clipboard-list text-brand mr-2"></i>Staff Directory / បញ្ជីឈ្មោះបុគ្គលិក</h2>
+              <p class="text-xs text-slate-400 mt-1">Full index of active rosters with multi-department roles.</p>
+            </div>
+            <button class="btn btn-tg font-bold text-xs shadow-md" onclick="broadcastStaffList()"><i class="fa-brands fa-telegram mr-2"></i>Send List to TG</button>
+          </div>
+          <div class="overflow-x-auto mt-4">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-400 text-xs uppercase font-bold">
+                  <th class="p-3">Staff Name</th>
+                  <th class="p-3">Departments</th>
+                  <th class="p-3">Role</th>
+                  <th class="p-3">Shift Times</th>
+                  <th class="p-3 text-right">Base Salary</th>
+                </tr>
+              </thead>
+              <tbody id="staff-list-tbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ CATEGORIES TAB ════ -->
+      <div id="section-categories" class="section">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:.5rem">
+          <h2 style="font-weight:900;font-size:1.1rem"><i class="fa-solid fa-layer-group" style="color:var(--brand);margin-right:.4rem"></i>
+            <span class="t-km">ប្រភេទ / នាយកដ្ឋាន</span><span class="t-en">Departments</span>
+          </h2>
+          <button class="btn btn-primary" onclick="openCategoryModal()"><i class="fa-solid fa-plus"></i>Add Dept</button>
+        </div>
+        <div id="categories-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem"></div>
+      </div>
+
+      <!-- ════ PAYROLL TAB ════ -->
+      <div id="section-payroll" class="section">
+        <div class="card" style="padding:1.25rem;margin-bottom:1rem">
+          <h3 style="font-weight:900;margin-bottom:1rem"><i class="fa-solid fa-chart-column" style="color:var(--brand);margin-right:.4rem"></i>Payroll Chart</h3>
+          <div class="chart-wrap"><canvas id="payrollChart"></canvas></div>
+        </div>
+        <div class="card" style="padding:1.25rem;margin-bottom:1rem">
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);gap:.5rem">
+            <div>
+              <h3 style="font-weight:900"><i class="fa-solid fa-money-check-dollar" style="color:#22c55e;margin-right:.4rem"></i>Monthly Payroll</h3>
+              <div id="payroll-month-lbl" style="color:var(--text3);font-size:.8rem;margin-top:.25rem"></div>
+            </div>
+            <button class="btn btn-ghost" onclick="exportPayrollCSV()" style="font-size:.78rem"><i class="fa-solid fa-file-csv"></i>CSV</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:.875rem">
+              <thead><tr style="background:var(--bg)">
+                <th style="padding:.65rem 1rem;text-align:left;color:var(--text3);font-weight:700;font-size:.75rem">Name</th>
+                <th style="padding:.65rem 1rem;text-align:left;color:var(--text3);font-weight:700;font-size:.75rem">Dept</th>
+                <th style="padding:.65rem 1rem;text-align:left;color:var(--text3);font-weight:700;font-size:.75rem">Salary</th>
+                <th style="padding:.65rem 1rem;text-align:left;color:var(--text3);font-weight:700;font-size:.75rem">Days</th>
+                <th style="padding:.65rem 1rem;text-align:left;color:var(--text3);font-weight:700;font-size:.75rem">Day-Off</th>
+                <th style="padding:.65rem 1rem;text-align:right;color:var(--text3);font-weight:700;font-size:.75rem">Earned</th>
+              </tr></thead>
+              <tbody id="payroll-tbody" style="border-top:1px solid var(--border)"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ CALENDAR TAB ════ -->
+      <div id="section-calendar" class="section">
+        <div class="card" style="padding:1.25rem">
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:.5rem">
+            <div>
+              <h2 style="font-weight:900;font-size:1.1rem"><i class="fa-solid fa-calendar-days" style="color:var(--brand);margin-right:.4rem"></i>
+                <span class="t-km">ប្រតិទិនវត្តមាន & ថ្ងៃឈប់</span><span class="t-en">Attendance & Day-Off Calendar</span>
+              </h2>
+            </div>
+            <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+              <select id="cal-staff-filter" onchange="renderCalendar()" style="width:160px"><option value="">All Staff</option></select>
+              <button onclick="calPrevMonth()" class="btn btn-ghost" style="padding:.4rem .8rem"><i class="fa-solid fa-chevron-left"></i></button>
+              <span id="cal-month-label" style="font-weight:900;font-size:1rem;min-width:140px;text-align:center"></span>
+              <button onclick="calNextMonth()" class="btn btn-ghost" style="padding:.4rem .8rem"><i class="fa-solid fa-chevron-right"></i></button>
+              <button onclick="calToday()" class="btn btn-primary" style="padding:.4rem .8rem;font-size:.78rem">Today</button>
+            </div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+
+          <!-- CALENDAR DAY DETAILS PANEL -->
+          <div id="cal-details-panel" class="card p-5 mt-4 relative" style="display:none">
+            <button onclick="closeCalDetails()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold transition-all hover:scale-110">&times;</button>
+            <h3 id="cal-details-date" class="text-base font-black text-slate-800 dark:text-slate-100 mb-4"></h3>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Attendance Column -->
+              <div>
+                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-3">Attendance</h4>
+                <div id="cal-details-attendance" class="space-y-2"></div>
+              </div>
+              <!-- Dayoffs Column -->
+              <div>
+                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-3">Day-offs</h4>
+                <div id="cal-details-dayoffs" class="space-y-2"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ════ DAY-OFF ROSTER TAB ════ -->
+      <div id="section-dayoffroster" class="section">
+        <div class="card p-5 mb-4 bg-gradient-to-r from-brand-50 to-white dark:from-slate-900/40 dark:to-slate-900 border-brand-100">
+          <div class="flex justify-between items-center flex-wrap gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <h2 class="text-lg font-black"><i class="fa-solid fa-umbrella-beach text-brand mr-2"></i>Day-Off & Leave Roster / បញ្ជីឈ្មោះថ្ងៃសម្រាក</h2>
+              <p class="text-xs text-slate-400 mt-1">Manage and track scheduled leaves, sick calls, and standard rest periods across your teams.</p>
+            </div>
+            <div class="flex gap-2 font-bold">
+              <button class="btn btn-primary" onclick="openDayoffModal()"><i class="fa-solid fa-plus"></i> Request Day-Off</button>
+              <button class="btn btn-tg text-xs font-bold" onclick="broadcastDayoffRoster()"><i class="fa-brands fa-telegram mr-2"></i>Send Dayoff List to TG</button>
+            </div>
+          </div>
+          
+          <!-- Summary Counters -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            <div class="p-3 border rounded-xl bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
+              <div class="text-[10px] font-bold text-slate-400 uppercase">Regular Rest Days</div>
+              <div class="text-xl font-black text-slate-700 dark:text-slate-300 mt-1" id="roster-stat-regular">0</div>
+            </div>
+            <div class="p-3 border rounded-xl bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
+              <div class="text-[10px] font-bold text-slate-400 uppercase">Annual Leaves</div>
+              <div class="text-xl font-black text-amber-600 mt-1" id="roster-stat-annual">0</div>
+            </div>
+            <div class="p-3 border rounded-xl bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
+              <div class="text-[10px] font-bold text-slate-400 uppercase">Sick Leaves</div>
+              <div class="text-xl font-black text-rose-600 mt-1" id="roster-stat-sick">0</div>
+            </div>
+            <div class="p-3 border rounded-xl bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
+              <div class="text-[10px] font-bold text-slate-400 uppercase">Pending Approvals</div>
+              <div class="text-xl font-black text-purple-600 mt-1" id="roster-stat-pending">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <div class="flex justify-between items-center flex-wrap gap-2 pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
+            <h3 class="text-sm font-black text-slate-700 dark:text-slate-300">Roster Registry</h3>
+            <div class="flex gap-2">
+              <select id="roster-type-filter" onchange="renderDayoffRoster()" style="width:140px" class="text-xs">
+                <option value="">All Leave Types</option>
+                <option value="Regular">Regular</option>
+                <option value="Annual">Annual</option>
+                <option value="Sick">Sick</option>
+                <option value="Personal">Personal</option>
+              </select>
+              <select id="roster-status-filter" onchange="renderDayoffRoster()" style="width:140px" class="text-xs">
+                <option value="">All Statuses</option>
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+              </select>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left">
+              <thead>
+                <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-400 font-bold uppercase">
+                  <th class="p-3">Staff Name</th>
+                  <th class="p-3">Department</th>
+                  <th class="p-3">Day-Off Date</th>
+                  <th class="p-3">Type</th>
+                  <th class="p-3">Reason</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="roster-tbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ SHIFT PLANNER TAB ════ -->
+      <div id="section-planner" class="section">
+        <div class="card" style="padding:1.25rem">
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:1.25rem;gap:.5rem">
+            <div>
+              <h2 style="font-weight:900;font-size:1.1rem"><i class="fa-solid fa-table-columns" style="color:var(--brand);margin-right:.4rem"></i>
+                <span class="t-km">ផែនការវេន / សប្តាហ៍</span><span class="t-en">Weekly Shift Planner</span>
+              </h2>
+              <div id="planner-week-label" style="color:var(--text3);font-size:.8rem;margin-top:.2rem"></div>
+            </div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+              <button onclick="plannerPrevWeek()" class="btn btn-ghost" style="padding:.4rem .8rem"><i class="fa-solid fa-chevron-left"></i></button>
+              <button onclick="plannerThisWeek()" class="btn btn-primary" style="padding:.4rem .8rem;font-size:.78rem">This Week</button>
+              <button onclick="plannerNextWeek()" class="btn btn-ghost" style="padding:.4rem .8rem"><i class="fa-solid fa-chevron-right"></i></button>
+              <!-- RE-ADDED SHIFT DISPATCH BUTTON -->
+              <button class="btn btn-tg" onclick="broadcastShiftPlan()"><i class="fa-brands fa-telegram"></i>Send Plan</button>
+            </div>
+          </div>
+          <!-- RE-ADDED SLOT EXPLANATORY CHIPS -->
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;font-size:.75rem;font-weight:700">
+            <span class="shift-slot work" style="padding:.2rem .6rem;min-height:auto;cursor:default">✅ Work</span>
+            <span class="shift-slot off" style="padding:.2rem .6rem;min-height:auto;cursor:default">🏖️ Day-Off</span>
+            <span class="shift-slot leave" style="padding:.2rem .6rem;min-height:auto;cursor:default">🤒 Leave</span>
+            <span style="font-size:.75rem;color:var(--text3)">— Click slot to toggle</span>
+          </div>
+          <div id="planner-day-headers" style="display:grid;grid-template-columns:140px repeat(7,1fr);gap:3px;margin-bottom:3px"></div>
+          <div id="planner-body" style="display:flex;flex-direction:column;gap:3px"></div>
+          <!-- RE-ADDED SAVE BUTTON -->
+          <div style="margin-top:1rem;display:flex;justify-content:flex-end">
+            <button class="btn btn-primary" onclick="saveShiftPlan()"><i class="fa-solid fa-save"></i>Save Plan</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ ANALYTICS TAB ════ -->
+      <div id="section-analytics" class="section">
+        <!-- HEADER WITH TG ALERTS SYSTEM -->
+        <div class="flex justify-between items-center flex-wrap gap-2 mb-4">
+          <h2 style="font-weight:900;font-size:1.1rem"><i class="fa-solid fa-chart-line" style="color:var(--brand);margin-right:.4rem"></i>
+            <span class="t-km">ការវិភាគស៊ីជម្រៅ</span><span class="t-en">Advanced Analytics</span>
+          </h2>
+          <!-- SEND ANALYTICS TO TELEGRAM -->
+          <button class="btn btn-tg font-bold text-xs" onclick="broadcastAnalytics()"><i class="fa-brands fa-telegram mr-2"></i>Send Analytics to TG</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem;margin-bottom:1rem">
+          <div class="card" style="padding:1rem;text-align:center"><div style="font-size:1.8rem;font-weight:900;color:var(--brand)" id="an-rate">0%</div><div style="color:var(--text3);font-size:.75rem;font-weight:700">Attendance Rate</div></div>
+          <div class="card" style="padding:1rem;text-align:center"><div style="font-size:1.8rem;font-weight:900;color:#ef4444" id="an-late-rate">0%</div><div style="color:var(--text3);font-size:.75rem;font-weight:700">Late Rate</div></div>
+          <div class="card" style="padding:1rem;text-align:center"><div style="font-size:1.8rem;font-weight:900;color:#8b5cf6" id="an-early-rate">0%</div><div style="color:var(--text3);font-size:.75rem;font-weight:700">Early Out Rate</div></div>
+          <div class="card" style="padding:1rem;text-align:center"><div style="font-size:1.8rem;font-weight:900;color:#f59e0b" id="an-dayoff">0</div><div style="color:var(--text3);font-size:.75rem;font-weight:700">Day-Offs This Month</div></div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <div class="card p-4"><h4 style="font-weight:900;margin-bottom:.75rem;font-size:.9rem">Daily Check-Ins (This Month)</h4><div class="chart-wrap" style="height:200px"><canvas id="dailyChart"></canvas></div></div>
+          <div class="card p-4"><h4 style="font-weight:900;margin-bottom:.75rem;font-size:.9rem">Check-In Status</h4><div class="chart-wrap" style="height:200px"><canvas id="statusChart"></canvas></div></div>
+        </div>
+        <!-- RE-ADDED MOST LATE & MOST PRESENT LISTS -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="card p-4"><h4 style="font-weight:900;margin-bottom:.75rem;font-size:.9rem;color:#ef4444"><i class="fa-solid fa-triangle-exclamation" style="margin-right:.3rem"></i>Most Late</h4><div id="top-late-list" style="display:flex;flex-direction:column;gap:.5rem"></div></div>
+          <div class="card p-4"><h4 style="font-weight:900;margin-bottom:.75rem;font-size:.9rem;color:#22c55e"><i class="fa-solid fa-star" style="margin-right:.3rem"></i>Most Present</h4><div id="top-present-list" style="display:flex;flex-direction:column;gap:.5rem"></div></div>
+        </div>
+      </div>
+
+      <!-- ════ DOCUMENTS TAB ════ -->
+      <div id="section-documents" class="section">
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+          <!-- Left side layout column to add/delete Custom categories dynamic list -->
+          <div class="xl:col-span-1 card p-4 h-fit space-y-4">
+            <h3 class="text-sm font-black flex items-center gap-2 border-b pb-3 border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-300">
+              <i class="fa-solid fa-folder-plus text-blue-500"></i> Manage Categories
+            </h3>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 mb-1">NEW CATEGORY ID / NAME</label>
+                <input type="text" id="new-doc-cat" class="w-full text-xs py-2 px-3" placeholder="e.g. Health License">
+              </div>
+              <button class="btn btn-primary w-full text-xs font-bold py-2 justify-center" onclick="addCustomDocCategory()">Add Category</button>
+            </div>
+            <div class="divider"></div>
+            <div class="space-y-1" id="doc-categories-list"></div>
+          </div>
+
+          <div class="xl:col-span-3 space-y-4">
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.5rem">
+              <h2 style="font-weight:900;font-size:1.1rem"><i class="fa-solid fa-folder-open" style="color:var(--brand);margin-right:.4rem"></i>Staff Documents</h2>
+              <div style="display:flex;gap:.5rem;align-items:center">
+                <select id="doc-staff-filter" onchange="renderDocuments()" style="width:160px"><option value="">All Staff</option></select>
+                <button class="btn btn-primary" onclick="openUploadModal()"><i class="fa-solid fa-upload"></i>Upload</button>
+              </div>
+            </div>
+            <div id="docs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ BOT TAB ════ -->
+      <div id="section-bot" class="section">
+        <!-- RE-ADDED BOT MANAGEMENT SECTION -->
+        <div class="card" style="padding:1rem;margin-bottom:1rem;background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#f59e0b">
+          <p style="font-weight:700;color:#92400e;font-size:.88rem"><i class="fa-solid fa-triangle-exclamation" style="margin-right:.3rem;color:#f59e0b"></i>Bot only replies when this page is open</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="card p-4 lg:col-span-1">
+            <h3 style="font-weight:900;margin-bottom:1rem"><i class="fa-solid fa-plus-circle" style="color:var(--brand);margin-right:.4rem"></i>Add Command</h3>
+            <div style="display:flex;flex-direction:column;gap:.75rem">
+              <div><label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.35rem">Command</label><input type="text" id="bot-cmd" placeholder="/start" style="width:100%"></div>
+              <div><label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.35rem">Reply</label><textarea id="bot-reply" rows="4" style="width:100%;resize:vertical"></textarea></div>
+              <button class="btn btn-primary" style="justify-content:center" onclick="saveBotCommand()"><i class="fa-solid fa-save"></i>Save</button>
+            </div>
+          </div>
+          <div class="card p-4 lg:col-span-2">
+            <h3 style="font-weight:900;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
+              <i class="fa-solid fa-list" style="color:var(--brand)"></i>Active Commands
+              <span style="background:#dcfce7;color:#166534;padding:.15rem .5rem;border-radius:99px;font-size:.72rem;border:1px solid #bbf7d0;animation:pulse 2s infinite">• Listening</span>
+            </h3>
+            <div id="bot-cmds-container" style="display:flex;flex-direction:column;gap:.6rem"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ MASTER SETTINGS TAB ════ -->
+      <div id="section-settings" class="section">
+        <div style="margin-bottom:1rem">
+          <h2 style="font-weight:900;font-size:1.1rem;margin-bottom:.25rem"><i class="fa-solid fa-sliders text-brand-600 mr-2"></i>System Settings & Configuration</h2>
+          <p style="color:var(--text3);font-size:.8rem">Customize branding themes, physical geofences, and messaging templates.</p>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div class="space-y-6">
+            
+            <!-- Branding Setup -->
+            <div class="card p-5 space-y-4">
+              <h3 class="text-md font-black flex items-center gap-2"><i class="fa-solid fa-square-poll-horizontal text-brand-600"></i> Administration Branding</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 mb-1">SYSTEM NAME (KHMER)</label>
+                  <input type="text" id="set-sys-name-kh" class="w-full" placeholder="ហាងកាហ្វេ Admin">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 mb-1">SYSTEM NAME (ENGLISH)</label>
+                  <input type="text" id="set-sys-name-en" class="w-full" placeholder="Café Admin">
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Color preset picker with a freeform color input -->
+            <div class="card p-5 space-y-3">
+              <h3 class="text-md font-black flex items-center gap-2"><i class="fa-solid fa-palette text-brand-600"></i> Theme Brand Palette</h3>
+              <p class="text-xs text-slate-400">Modify the primary visual brand identity of all administrative control elements.</p>
+              
+              <!-- Freeform hex custom Color Picker -->
+              <div class="p-4 border border-slate-100 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50 flex items-center gap-4">
+                <input type="color" id="custom-brand-picker" onchange="applyCustomColorPreset(this.value)" class="w-12 h-12 rounded-lg cursor-pointer border-2 border-slate-200">
+                <div>
+                  <span class="block text-xs font-bold text-slate-700 dark:text-slate-300">Custom Brand Color Selector</span>
+                  <span class="block text-[10px] text-slate-400 mt-0.5">Pick any color palette shade dynamically!</span>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2.5 mt-3" id="theme-selectors">
+                <button onclick="changeThemePreset('green')" data-theme="green" class="theme-btn flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-bold text-xs hover:bg-slate-50">
+                  <span class="w-3.5 h-3.5 rounded-full bg-emerald-500"></span> Emerald Green
+                </button>
+                <button onclick="changeThemePreset('blue')" data-theme="blue" class="theme-btn flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-bold text-xs hover:bg-slate-50">
+                  <span class="w-3.5 h-3.5 rounded-full bg-blue-500"></span> Sapphire Blue
+                </button>
+                <button onclick="changeThemePreset('purple')" data-theme="purple" class="theme-btn flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-bold text-xs hover:bg-slate-50">
+                  <span class="w-3.5 h-3.5 rounded-full bg-violet-500"></span> Amethyst Purple
+                </button>
+                <button onclick="changeThemePreset('amber')" data-theme="amber" class="theme-btn flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-bold text-xs hover:bg-slate-50">
+                  <span class="w-3.5 h-3.5 rounded-full bg-amber-500"></span> Amber Orange
+                </button>
+                <button onclick="changeThemePreset('red')" data-theme="red" class="theme-btn flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-bold text-xs hover:bg-slate-50">
+                  <span class="w-3.5 h-3.5 rounded-full bg-red-500"></span> Crimson Red
+                </button>
+              </div>
+            </div>
+
+            <!-- Shift Rule Controls -->
+            <div class="card p-5 space-y-4">
+              <h3 class="text-md font-black flex items-center gap-2"><i class="fa-solid fa-clock text-brand-600"></i> Work Shift Controls</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 mb-1">EARLY CHECKOUT THRESHOLD (MINS)</label>
+                  <input type="number" id="set-early-mins" class="w-full" min="5" max="60" value="15">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 mb-1">SHIFT REMINDER OFFSET (MINS)</label>
+                  <input type="number" id="set-reminder-mins" class="w-full" min="5" max="120" value="30">
+                </div>
+              </div>
+              <div class="space-y-2 mt-2">
+                <label class="flex items-center gap-2.5 font-bold text-sm cursor-pointer">
+                  <input type="checkbox" id="set-reminder-enabled" class="accent-brand-600 w-4 h-4"> Enable Shift Telegram Reminder Alerts
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Dual locations store coordinates fences -->
+          <div class="space-y-6">
+            <div class="card p-5 space-y-4">
+              <div class="flex justify-between items-center flex-wrap gap-2">
+                <h3 class="text-md font-black flex items-center gap-2"><i class="fa-solid fa-map-location-dot text-brand-600"></i> Physical Store Boundaries (Two Locations)</h3>
+              </div>
+              <div id="map" class="shadow-sm"></div>
+              
+              <!-- Location 1 Panel -->
+              <div class="p-3 border rounded-lg bg-slate-50 dark:bg-slate-950/20 space-y-3">
+                <div class="flex justify-between items-center">
+                  <h4 class="text-xs font-black text-slate-600 dark:text-slate-400">📍 Store Branch 1 (Primary Location)</h4>
+                  <button class="btn btn-ghost py-1 px-2 text-[10px]" onclick="useMyLocation(1)"><i class="fa-solid fa-crosshairs"></i> Use GPS</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[9px] font-bold text-slate-400">BRANCH 1 NAME</label>
+                    <input type="text" id="set-loc1-name" class="w-full text-xs p-1.5" value="Main Branch">
+                  </div>
+                  <div>
+                    <label class="block text-[9px] font-bold text-slate-400">LIMIT RAD (M)</label>
+                    <input type="number" id="set-loc1-rad" class="w-full text-xs p-1.5" value="100" oninput="updateMapsGeometry()">
+                  </div>
+                </div>
+                <div class="text-[11px] font-mono text-slate-500">
+                  Lat: <span id="loc1-lat-val">-</span> | Lng: <span id="loc1-lng-val">-</span>
+                </div>
+              </div>
+
+              <!-- Location 2 Panel -->
+              <div class="p-3 border rounded-lg bg-slate-50 dark:bg-slate-950/20 space-y-3">
+                <div class="flex justify-between items-center">
+                  <h4 class="text-xs font-black text-slate-600 dark:text-slate-400">📍 Store Branch 2 (Secondary Location)</h4>
+                  <button class="btn btn-ghost py-1 px-2 text-[10px]" onclick="useMyLocation(2)"><i class="fa-solid fa-crosshairs"></i> Use GPS</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[9px] font-bold text-slate-400">BRANCH 2 NAME</label>
+                    <input type="text" id="set-loc2-name" class="w-full text-xs p-1.5" value="Branch B">
+                  </div>
+                  <div>
+                    <label class="block text-[9px] font-bold text-slate-400">LIMIT RAD (M)</label>
+                    <input type="number" id="set-loc2-rad" class="w-full text-xs p-1.5" value="100" oninput="updateMapsGeometry()">
+                  </div>
+                </div>
+                <div class="text-[11px] font-mono text-slate-500">
+                  Lat: <span id="loc2-lat-val">-</span> | Lng: <span id="loc2-lng-val">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RE-ADDED TELEGRAM DISPATCH TEMPLATES WRAP -->
+        <div class="card p-5 mt-6 space-y-4">
+          <h3 class="text-md font-black flex items-center gap-2"><i class="fa-solid fa-comments text-brand-600"></i> Telegram Dispatch Templates</h3>
+          <div class="card p-3 bg-brand-light dark:bg-slate-900/50 border-brand-200">
+            <div class="font-bold text-xs text-brand-800 dark:text-brand-200 mb-2">Available Dispatch Variables:</div>
+            <div class="flex flex-wrap gap-1.5">
+              <code class="px-2 py-0.5 text-[10px] bg-white dark:bg-slate-800 border dark:border-slate-700 rounded font-mono">{name}</code>
+              <code class="px-2 py-0.5 text-[10px] bg-white dark:bg-slate-800 border dark:border-slate-700 rounded font-mono">{time}</code>
+              <code class="px-2 py-0.5 text-[10px] bg-white dark:bg-slate-800 border dark:border-slate-700 rounded font-mono">{date}</code>
+              <code class="px-2 py-0.5 text-[10px] bg-white dark:bg-slate-800 border dark:border-slate-700 rounded font-mono">{status}</code>
+              <code class="px-2 py-0.5 text-[10px] bg-white dark:bg-slate-800 border dark:border-slate-700 rounded font-mono">{late_mins}</code>
+              <code class="px-2 py-0.5 text-[10px] bg-white dark:bg-slate-800 border dark:border-slate-700 rounded font-mono">{shift_start}</code>
+              <code class="px-2 py-0.5 text-[10px] bg-white dark:bg-slate-800 border dark:border-slate-700 rounded font-mono">{shift_end}</code>
+              <code class="px-2 py-0.5 text-[10px] bg-white dark:bg-slate-800 border dark:border-slate-700 rounded font-mono">{dayoff_date}</code>
+              <code class="px-2 py-0.5 text-[10px] bg-white dark:bg-slate-800 border dark:border-slate-700 rounded font-mono">{reason}</code>
+              <code class="px-2 py-0.5 text-[10px] bg-white dark:bg-slate-800 border dark:border-slate-700 rounded font-mono">{branch}</code>
+            </div>
+          </div>
+          <div id="alert-templates-wrap" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+          <div class="flex justify-end pt-3">
+            <button class="btn btn-primary" onclick="saveAlertTemplates()"><i class="fa-solid fa-save"></i> Save Templates Only</button>
+          </div>
+        </div>
+
+        <div class="flex justify-center mt-6">
+          <button class="btn btn-primary px-8 py-3.5 shadow-lg" onclick="saveMasterSettings()"><i class="fa-solid fa-save mr-2"></i> Save All Settings</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- UI CONTROLS SCRIPT (RE-ADDED FULLY AND CLOSED PROPERLY TO ELIMINATE PARSING ERRORS) -->
+<script>
+const TAB_IDS=['dashboard','logs','staff','stafflist','categories','payroll','calendar','dayoffroster','planner','analytics','documents','bot','settings'];
+window.switchTab=function(id){
+  TAB_IDS.forEach(t=>{
+    const sec=document.getElementById('section-'+t);
+    const btn=document.getElementById('tab-'+t);
+    if(sec)sec.classList.remove('active');
+    if(btn)btn.classList.remove('active');
+  });
+  const sec=document.getElementById('section-'+id),btn=document.getElementById('tab-'+id);
+  if(sec)sec.classList.add('active');
+  if(btn)btn.classList.add('active');
+  
+  if(id==='payroll'&&window.renderPayroll)setTimeout(window.renderPayroll,80);
+  if(id==='analytics'&&window.renderAnalytics)setTimeout(window.renderAnalytics,80);
+  if(id==='calendar'&&window.renderCalendar)setTimeout(window.renderCalendar,80);
+  if(id==='dayoffroster'&&window.renderDayoffRoster)setTimeout(window.renderDayoffRoster,80);
+  if(id==='planner'&&window.renderPlannerHeaders)setTimeout(window.renderPlannerHeaders,80);
+  if(id==='stafflist'&&window.renderStaffList)setTimeout(window.renderStaffList,80);
+  
+  if(id==='settings' && mapInst) {
+    setTimeout(() => { mapInst.invalidateSize(); }, 120);
+  }
+  
+  const np=document.getElementById('notif-panel');
+  if(np)np.style.display='none';
+  toggleSidebar(false);
+};
+
+window.toggleSidebar=(open)=>{
+  const sidebar=document.getElementById('sidebar');
+  const overlay=document.getElementById('mobile-overlay');
+  if(open){
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+  } else {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  }
+};
+
+window.closeModal=id=>{const el=document.getElementById(id);if(el)el.style.display='none';};
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',function(e){
+    if(e.target===this)closeModal(this.id);
+  });
+});
+
+window.toggleDark=()=>{
+  const isDark=document.documentElement.classList.toggle('dark');
+  localStorage.setItem('cafe-dark',isDark?'1':'0');
+  document.getElementById('dark-btn').innerHTML=isDark?'<i class="fa-solid fa-sun" style="font-size:.9rem"></i>':'<i class="fa-solid fa-moon" style="font-size:.9rem"></i>';
+};
+
+window.toggleLang=()=>{
+  const cur=document.documentElement.getAttribute('data-lang')||'km';
+  const next=cur==='km'?'en':'km';
+  document.documentElement.setAttribute('data-lang',next);
+  localStorage.setItem('cafe-lang',next);
+  document.getElementById('lang-label').textContent=next==='km'?'EN':'ខ្មែរ';
+};
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const first=document.querySelector('.color-opt');
+  if(first){
+    first.style.border='3px solid white';
+    first.style.boxShadow='0 0 0 2px '+first.dataset.color;
+  }
+  document.addEventListener('click',e=>{
+    const panel=document.getElementById('notif-panel');
+    const bell=document.getElementById('notif-bell');
+    if(panel&&bell&&!panel.contains(e.target)&&!bell.contains(e.target))panel.style.display='none';
+  });
+  
+  // Apply saved local states securely
+  if(localStorage.getItem('cafe-dark')==='1'){
+    document.documentElement.classList.add('dark');
+    const b=document.getElementById('dark-btn');
+    if(b)b.innerHTML='<i class="fa-solid fa-sun" style="font-size:.9rem"></i>';
+  }
+  const savedLang=localStorage.getItem('cafe-lang');
+  if(savedLang){
+    document.documentElement.setAttribute('data-lang',savedLang);
+    const lb=document.getElementById('lang-label');
+    if(lb)lb.textContent=savedLang==='km'?'EN':'ខ្មែរ';
+  }
+});
+</script>
+</body>
+</html>
