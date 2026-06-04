@@ -1,70 +1,1108 @@
+```html
 <!DOCTYPE html>
-<html lang="km">
+<html lang="en" class="dark h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat Interface</title>
+    <title>Grok AI - Interactive Sandbox</title>
+    
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-4">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        grokDark: '#000000',
+                        grokGray: '#0F1419',
+                        grokBorder: '#2F3336',
+                        grokBlue: '#1D9BF0',
+                        grokAccent: '#3a86ff',
+                        grokFun: '#FF9F1C'
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
 
-    <div class="w-full max-w-2xl bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 p-6">
-        <h1 class="text-2xl font-bold text-blue-400 mb-4 text-center">Grok AI Assistant</h1>
+    <!-- Lucide Icons for high-fidelity icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Markdown parsing & Code Highlighting -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+    <style>
+        /* Custom scrollbar behavior for a clean terminal feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2F3336;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1D9BF0;
+        }
         
-        <!-- Chat Area -->
-        <div id="chat-box" class="h-96 overflow-y-auto mb-4 p-4 bg-slate-950 rounded-lg border border-slate-800 space-y-4">
-            <p class="text-gray-500 text-sm text-center">ចាប់ផ្តើមសន្ទនាជាមួយ AI...</p>
+        /* Premium custom typography overrides inside rendered Markdown */
+        .markdown-body {
+            color: #E7E9EA;
+            line-height: 1.625;
+        }
+        .markdown-body p {
+            margin-bottom: 1rem;
+        }
+        .markdown-body pre {
+            background-color: #0F1419 !important;
+            border: 1px solid #2F3336;
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        .markdown-body code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9em;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+        .markdown-body pre code {
+            background-color: transparent !important;
+            padding: 0;
+            border-radius: 0;
+        }
+        .markdown-body ul, .markdown-body ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            list-style-type: disc;
+        }
+        .markdown-body ol {
+            list-style-type: decimal;
+        }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #FFFFFF;
+        }
+        .markdown-body h1 { font-size: 1.5rem; }
+        .markdown-body h2 { font-size: 1.25rem; }
+        .markdown-body h3 { font-size: 1.1rem; }
+        
+        /* Shimmer effect for loaders */
+        @keyframes shimmer {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.4; }
+        }
+        .animate-shimmer {
+            animation: shimmer 1.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-grokDark text-[#E7E9EA] h-full flex flex-col overflow-hidden font-sans">
+
+    <!-- Top Navigation Bar -->
+    <header class="h-16 border-b border-grokBorder bg-grokDark/90 backdrop-blur flex items-center justify-between px-4 z-10 flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <button id="sidebarToggle" class="p-2 hover:bg-grokBorder/50 rounded-full transition lg:hidden" aria-label="Toggle Sidebar">
+                <i data-lucide="menu" class="w-5 h-5 text-white"></i>
+            </button>
+            <div class="flex items-center gap-2">
+                <!-- Grok Stylized Icon -->
+                <div class="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center font-black text-xl tracking-tighter select-none">
+                    G
+                </div>
+                <div>
+                    <span class="font-bold text-white tracking-wide text-lg flex items-center gap-1.5">
+                        Grok AI 
+                        <span id="grokBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700 font-normal">Regular</span>
+                    </span>
+                    <p class="text-[10px] text-neutral-500 font-mono">powered by xAI</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Input Area -->
-        <div class="flex gap-2">
-            <input type="text" id="user-input" placeholder="សួរសំណួររបស់អ្នកនៅទីនេះ..." 
-                   class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500">
-            <button onclick="sendMessage()" id="send-btn"
-                    class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg font-bold transition">ផ្ញើ</button>
+        <!-- Middle: Grok Mode Switcher -->
+        <div class="hidden sm:flex items-center bg-neutral-900 p-1 rounded-full border border-grokBorder">
+            <button onclick="setGrokMode('regular')" id="btnModeRegular" class="px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 bg-white text-black shadow-sm">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Regular
+            </button>
+            <button onclick="setGrokMode('fun')" id="btnModeFun" class="px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 text-neutral-400 hover:text-white">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Fun Mode
+            </button>
+        </div>
+
+        <!-- Right Side Controls -->
+        <div class="flex items-center gap-2">
+            <!-- Settings trigger button -->
+            <button onclick="toggleSettingsModal()" class="p-2 hover:bg-grokBorder/50 rounded-full text-neutral-400 hover:text-white transition" title="API Settings">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+            </button>
+            <!-- Clear chat logs -->
+            <button onclick="confirmClearHistory()" class="p-2 hover:bg-grokBorder/50 rounded-full text-neutral-400 hover:text-rose-400 transition" title="Reset Current Chat">
+                <i data-lucide="trash-2" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- App Body Container -->
+    <div class="flex flex-1 overflow-hidden relative">
+
+        <!-- Sidebar (History and Model Preferences) -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full lg:relative lg:translate-x-0 transition-transform duration-300 ease-in-out z-20 w-80 bg-grokDark border-r border-grokBorder flex flex-col justify-between flex-shrink-0">
+            <!-- Sidebar Header -->
+            <div class="p-4 border-b border-grokBorder flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-bold uppercase tracking-wider text-neutral-500">Workspace Settings</span>
+                    <button id="sidebarClose" class="lg:hidden p-1.5 hover:bg-neutral-800 rounded-full">
+                        <i data-lucide="x" class="w-4 h-4 text-white"></i>
+                    </button>
+                </div>
+                
+                <!-- xAI Model Selector -->
+                <div>
+                    <label class="block text-xs text-neutral-400 font-semibold mb-1.5">Active xAI Model</label>
+                    <select id="modelSelect" class="w-full bg-neutral-900 border border-grokBorder rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-grokBlue font-mono">
+                        <option value="grok-2-latest" selected>grok-2-latest</option>
+                        <option value="grok-2">grok-2</option>
+                        <option value="grok-2-vision-latest">grok-2-vision-latest 👁️</option>
+                        <option value="grok-beta">grok-beta</option>
+                    </select>
+                    <p class="text-[10px] text-neutral-500 mt-1">Select vision models to enable image attachments.</p>
+                </div>
+            </div>
+
+            <!-- Chat History Panel -->
+            <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-neutral-500">Local Conversations</span>
+                    <button onclick="createNewConversation()" class="text-xs font-medium text-grokBlue hover:underline flex items-center gap-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> New Chat
+                    </button>
+                </div>
+                
+                <!-- Chat list hooks -->
+                <div id="chatHistoryList" class="flex flex-col gap-1.5">
+                    <!-- Dynamic Items injected here -->
+                </div>
+            </div>
+
+            <!-- Footer Meta & API Status -->
+            <div class="p-4 border-t border-grokBorder bg-neutral-950/50">
+                <div class="flex items-center justify-between text-xs text-neutral-400">
+                    <span class="flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Key Active
+                    </span>
+                    <span id="tokenCounter" class="font-mono text-[10px]">0 msgs</span>
+                </div>
+                <!-- Mini warning banner about CORS browser limitations -->
+                <div class="mt-2 p-2 bg-neutral-900/50 rounded-lg border border-neutral-800 text-[10px] text-neutral-400 leading-snug">
+                    Note: Browser direct connections require CORS allowance. If blocked, utilize a proxy or local container.
+                </div>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile sidebar -->
+        <div id="sidebarOverlay" class="hidden fixed inset-0 bg-black/65 z-10 lg:hidden"></div>
+
+        <!-- Chat Workspace Panel -->
+        <main class="flex-1 flex flex-col bg-grokDark overflow-hidden relative">
+
+            <!-- Active Conversation Messages View -->
+            <div id="chatScrollArea" class="flex-1 overflow-y-auto px-4 py-6 md:px-8 space-y-6">
+                
+                <!-- Welcome Banner (Shown only when zero messages exist) -->
+                <div id="welcomeScreen" class="h-full flex flex-col items-center justify-center text-center max-w-xl mx-auto py-12 px-4">
+                    <div class="w-16 h-16 rounded-2xl bg-white text-black flex items-center justify-center font-black text-4xl mb-6 select-none shadow-xl">
+                        G
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-white tracking-tight mb-2">I am Grok.</h1>
+                    <p class="text-neutral-400 text-sm mb-8 leading-relaxed">
+                        Constructed by xAI. Empowered with genuine curiosity and structured answers. Feel free to activate <span class="text-grokFun font-bold">Fun Mode</span> for some wit and attitude.
+                    </p>
+
+                    <!-- Fast Interaction Prompt Chips -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                        <button onclick="usePromptChip('Draft a funny, sarcastic tweet responding to artificial intelligence replacing developers.')" class="p-4 bg-neutral-900 hover:bg-neutral-800 border border-grokBorder rounded-xl text-left text-xs transition duration-200">
+                            <span class="font-bold text-white block mb-1">🐦 Sarcastic Tweet</span>
+                            Write a witty reply to tech trends...
+                        </button>
+                        <button onclick="usePromptChip('Explain the concept of quantum computing superpositions using an analogy about a rotating coin.')" class="p-4 bg-neutral-900 hover:bg-neutral-800 border border-grokBorder rounded-xl text-left text-xs transition duration-200">
+                            <span class="font-bold text-white block mb-1">🌀 Quantum Superposition</span>
+                            Learn advanced ideas intuitively...
+                        </button>
+                        <button onclick="usePromptChip('Write a clean Python script using asyncio to scrape multiple mock URLs simultaneously with rich logging.')" class="p-4 bg-neutral-900 hover:bg-neutral-800 border border-grokBorder rounded-xl text-left text-xs transition duration-200">
+                            <span class="font-bold text-white block mb-1">🐍 Asyncio Web Scraper</span>
+                            Generate optimized Python boilerplate...
+                        </button>
+                        <button onclick="usePromptChip('Invent a unique sci-fi concept where memories are used as a luxury currency.')" class="p-4 bg-neutral-900 hover:bg-neutral-800 border border-grokBorder rounded-xl text-left text-xs transition duration-200">
+                            <span class="font-bold text-white block mb-1">🌌 Memory Currency Concept</span>
+                            Brainstorm speculative fiction ideas...
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Message Logs Target -->
+                <div id="chatMessages" class="max-w-3xl mx-auto space-y-6"></div>
+
+                <!-- API Response Loader Placeholder -->
+                <div id="loadingIndicator" class="hidden max-w-3xl mx-auto flex gap-4 items-start">
+                    <div class="w-8 h-8 rounded-lg bg-neutral-800 flex-shrink-0 flex items-center justify-center border border-neutral-700">
+                        <span class="text-xs font-bold text-neutral-300">G</span>
+                    </div>
+                    <div class="flex-1 bg-neutral-900/60 p-4 rounded-xl border border-neutral-800 space-y-2">
+                        <div class="h-4 bg-neutral-800 rounded w-1/3 animate-pulse"></div>
+                        <div class="h-3 bg-neutral-800 rounded w-5/6 animate-pulse"></div>
+                        <div class="h-3 bg-neutral-800 rounded w-2/3 animate-pulse"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image preview drawer (appears when user attaches a file) -->
+            <div id="imageDrawer" class="hidden px-4 py-2 border-t border-grokBorder bg-neutral-950/70 max-w-3xl mx-auto w-full flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="relative w-16 h-16 rounded overflow-hidden bg-neutral-900 border border-grokBorder">
+                        <img id="attachedImagePreview" src="" alt="Thumbnail" class="w-full h-full object-cover">
+                        <button onclick="removeAttachedImage()" class="absolute top-1 right-1 bg-black/80 hover:bg-black rounded-full p-0.5 text-rose-500">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-white block">Image Attached</span>
+                        <span class="text-[10px] text-neutral-400">Grok-2-Vision model will process this.</span>
+                    </div>
+                </div>
+                <div class="text-[10px] text-amber-500 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20">
+                    Switch to grok-2-vision-latest model!
+                </div>
+            </div>
+
+            <!-- Chat Footer Input Form Area -->
+            <div class="p-4 border-t border-grokBorder bg-grokDark/90 backdrop-blur flex-shrink-0">
+                <div class="max-w-3xl mx-auto relative">
+                    <form id="chatForm" onsubmit="handleChatSubmit(event)" class="relative flex items-end gap-2 bg-neutral-900 border border-grokBorder rounded-2xl p-2 focus-within:border-grokBlue transition">
+                        
+                        <!-- File Upload input hidden -->
+                        <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageAttachment(event)">
+                        
+                        <!-- File Attachment Action Pin -->
+                        <button type="button" onclick="triggerFileInput()" class="p-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl transition" title="Attach image">
+                            <i data-lucide="paperclip" class="w-5 h-5"></i>
+                        </button>
+
+                        <!-- STT (Speech to text) Feature -->
+                        <button type="button" onclick="toggleSpeechRecognition()" id="btnMic" class="p-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl transition" title="Voice Input">
+                            <i data-lucide="mic" id="micIcon" class="w-5 h-5"></i>
+                        </button>
+
+                        <!-- Text Input -->
+                        <textarea id="userInput" rows="1" placeholder="Ask Grok anything..." class="flex-1 bg-transparent border-0 text-white placeholder-neutral-500 focus:ring-0 text-sm resize-none py-2.5 focus:outline-none min-h-[40px] max-h-[160px]"></textarea>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="btnSubmit" class="p-2.5 bg-white text-black hover:bg-neutral-200 rounded-xl transition font-bold" title="Send message">
+                            <i data-lucide="arrow-up" class="w-5 h-5"></i>
+                        </button>
+                    </form>
+
+                    <div class="flex items-center justify-between px-2 mt-2">
+                        <p class="text-[10px] text-neutral-500">
+                            Press Enter to send. Shift+Enter for new line.
+                        </p>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span class="text-[10px] font-mono text-neutral-400">Endpoint: api.x.ai</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- API Settings Modal Box -->
+    <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-neutral-900 border border-grokBorder rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div class="px-6 py-4 border-b border-grokBorder flex items-center justify-between">
+                <h3 class="font-bold text-white text-lg flex items-center gap-2">
+                    <i data-lucide="key-round" class="w-5 h-5 text-grokBlue"></i> xAI Configuration
+                </h3>
+                <button onclick="toggleSettingsModal()" class="p-1 hover:bg-neutral-800 rounded-full">
+                    <i data-lucide="x" class="w-5 h-5 text-neutral-400 hover:text-white"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-neutral-400 mb-1.5">xAI API Key</label>
+                    <div class="relative">
+                        <input type="password" id="apiKeyInput" class="w-full bg-black border border-grokBorder rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-grokBlue focus:ring-1 focus:ring-grokBlue">
+                        <button onclick="toggleKeyVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white">
+                            <i data-lucide="eye" id="eyeIcon" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-neutral-500 mt-1.5 leading-relaxed">
+                        Your key is saved safely in local memory. Keep it secure and private.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-neutral-400 mb-1.5">CORS Routing Workaround</label>
+                    <select id="corsProxySelect" class="w-full bg-black border border-grokBorder rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-grokBlue">
+                        <option value="direct">Direct Connections (Standard browser calls)</option>
+                        <option value="allorigins">Proxy via AllOrigins (CORS evasion helper)</option>
+                    </select>
+                    <p class="text-[11px] text-neutral-500 mt-1.5 leading-relaxed">
+                        If calls fail due to browser CORS policies, switch to the Proxy setting to route requests correctly.
+                    </p>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-grokBorder bg-neutral-950 flex justify-end gap-3">
+                <button onclick="toggleSettingsModal()" class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-sm font-semibold transition">
+                    Close
+                </button>
+                <button onclick="saveApiKeySettings()" class="px-4 py-2 bg-grokBlue hover:bg-grokBlue/90 text-white rounded-xl text-sm font-semibold transition">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert / Confirmation Dialog Popups -->
+    <div id="customAlert" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+        <div class="bg-neutral-900 border border-grokBorder rounded-2xl max-w-sm w-full p-6 text-center shadow-xl">
+            <div id="alertIconContainer" class="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <h4 id="alertTitle" class="font-bold text-white text-lg mb-2">Notice</h4>
+            <p id="alertMessage" class="text-neutral-400 text-sm mb-6 leading-relaxed"></p>
+            <div class="flex justify-center gap-3">
+                <button id="alertCancelBtn" onclick="closeCustomAlert()" class="hidden px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-sm font-semibold transition">
+                    Cancel
+                </button>
+                <button id="alertConfirmBtn" onclick="closeCustomAlert()" class="px-6 py-2 bg-grokBlue hover:bg-grokBlue/90 text-white rounded-xl text-sm font-semibold transition">
+                    OK
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
-        const API_KEY = 'xai-7zTWbKQqNOkZe8FJMwf84sWmYAElxfRTXBKK4XQ7X1RedRSboYY262Ijz28NujEoKoI728kVL4UorMp8';
-        const chatBox = document.getElementById('chat-box');
+        // Set hardcoded API key provided in system command instruction
+        const DEFAULT_API_KEY = "xai-7zTWbKQqNOkZe8FJMwf84sWmYAElxfRTXBKK4XQ7X1RedRSboYY262Ijz28NujEoKoI728kVL4UorMp8";
 
-        async function sendMessage() {
-            const input = document.getElementById('user-input');
-            const message = input.value.trim();
-            if (!message) return;
+        // Global State Tree
+        let appState = {
+            apiKey: localStorage.getItem('grok_api_key') || DEFAULT_API_KEY,
+            corsProxy: localStorage.getItem('grok_cors_proxy') || 'direct',
+            grokMode: 'regular', // 'regular' or 'fun'
+            conversations: JSON.parse(localStorage.getItem('grok_conversations')) || [],
+            activeConversationId: localStorage.getItem('grok_active_convo_id') || null,
+            isGenerating: false,
+            attachedImageBase64: null,
+            recognition: null,
+            isRecording: false
+        };
 
-            // បង្ហាញសំណួរអ្នកប្រើ
-            addMessage('អ្នក', message, 'bg-blue-900');
-            input.value = '';
+        // Initialize App on DOM Loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            
+            // Check if key is already stored, otherwise store default
+            if (!localStorage.getItem('grok_api_key')) {
+                localStorage.setItem('grok_api_key', DEFAULT_API_KEY);
+            }
 
-            try {
-                const response = await fetch("https://api.x.ai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        model: "grok-beta",
-                        messages: [{ role: "user", content: message }]
-                    })
-                });
+            // Sync forms with variables
+            document.getElementById('apiKeyInput').value = appState.apiKey;
+            document.getElementById('corsProxySelect').value = appState.corsProxy;
 
-                const data = await response.json();
-                addMessage('Grok AI', data.choices[0].message.content, 'bg-slate-700');
-            } catch (error) {
-                addMessage('Error', 'មានបញ្ហាក្នុងការភ្ជាប់ជាមួយ AI', 'bg-red-900');
+            // Generate initial conversation context if history is empty
+            if (appState.conversations.length === 0) {
+                createNewConversation();
+            } else {
+                renderConversationsList();
+                loadActiveConversation();
+            }
+
+            // Textarea auto-resize listener
+            const textarea = document.getElementById('userInput');
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+
+            // Handle Shift+Enter submission block
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+                }
+            });
+
+            // Initialize Web Speech SpeechRecognition
+            initializeSpeech();
+
+            // Mobile sidebar handles
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarClose = document.getElementById('sidebarClose');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            const toggleMobileSidebar = () => {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            };
+
+            sidebarToggle.addEventListener('click', toggleMobileSidebar);
+            sidebarClose.addEventListener('click', toggleMobileSidebar);
+            overlay.addEventListener('click', toggleMobileSidebar);
+        });
+
+        // Toggle Settings Modal
+        function toggleSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.toggle('hidden');
+        }
+
+        // Toggle Password visibility
+        function toggleKeyVisibility() {
+            const input = document.getElementById('apiKeyInput');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                input.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        // Save Configuration Changes
+        function saveApiKeySettings() {
+            const keyVal = document.getElementById('apiKeyInput').value.trim();
+            const proxyVal = document.getElementById('corsProxySelect').value;
+
+            if(!keyVal) {
+                showCustomAlert("Authentication Failure", "Please supply a valid xAI Bearer Key.", "error");
+                return;
+            }
+
+            appState.apiKey = keyVal;
+            appState.corsProxy = proxyVal;
+            localStorage.setItem('grok_api_key', keyVal);
+            localStorage.setItem('grok_cors_proxy', proxyVal);
+
+            toggleSettingsModal();
+            showCustomAlert("Settings Saved", "Your updated connection configurations are now active.", "success");
+        }
+
+        // Change Grok system personality modes
+        function setGrokMode(mode) {
+            appState.grokMode = mode;
+            
+            const btnReg = document.getElementById('btnModeRegular');
+            const btnFun = document.getElementById('btnModeFun');
+            const badge = document.getElementById('grokBadge');
+
+            if (mode === 'regular') {
+                btnReg.className = "px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 bg-white text-black shadow-sm";
+                btnFun.className = "px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 text-neutral-400 hover:text-white";
+                badge.innerText = "Regular";
+                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700 font-normal";
+            } else {
+                btnReg.className = "px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 text-neutral-400 hover:text-white";
+                btnFun.className = "px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 bg-grokFun text-black font-extrabold shadow-sm";
+                badge.innerText = "Fun Mode";
+                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30 font-bold";
             }
         }
 
-        function addMessage(sender, text, colorClass) {
-            const div = document.createElement('div');
-            div.className = `p-3 rounded-lg ${colorClass} max-w-[80%]`;
-            div.innerHTML = `<strong class="block text-xs opacity-70">${sender}</strong> ${text}`;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
+        // Generate dynamic chat templates on quick click
+        function usePromptChip(text) {
+            const input = document.getElementById('userInput');
+            input.value = text;
+            input.style.height = 'auto';
+            input.style.height = (input.scrollHeight) + 'px';
+            input.focus();
+        }
+
+        // Display Custom Modal Alerts in lieu of raw browser alerts
+        function showCustomAlert(title, message, type = "info", onConfirm = null, showCancel = false) {
+            const alertBox = document.getElementById('customAlert');
+            const titleEl = document.getElementById('alertTitle');
+            const msgEl = document.getElementById('alertMessage');
+            const iconContainer = document.getElementById('alertIconContainer');
+            const cancelBtn = document.getElementById('alertCancelBtn');
+            const confirmBtn = document.getElementById('alertConfirmBtn');
+
+            titleEl.innerText = title;
+            msgEl.innerText = message;
+
+            // Change Colors based on type
+            if (type === "error") {
+                iconContainer.className = "w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-4";
+                iconContainer.innerHTML = `<i data-lucide="alert-triangle" class="w-6 h-6"></i>`;
+            } else if (type === "success") {
+                iconContainer.className = "w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto mb-4";
+                iconContainer.innerHTML = `<i data-lucide="check-circle" class="w-6 h-6"></i>`;
+            } else {
+                iconContainer.className = "w-12 h-12 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto mb-4";
+                iconContainer.innerHTML = `<i data-lucide="info" class="w-6 h-6"></i>`;
+            }
+
+            if (showCancel) {
+                cancelBtn.classList.remove('hidden');
+            } else {
+                cancelBtn.classList.add('hidden');
+            }
+
+            confirmBtn.onclick = () => {
+                alertBox.classList.add('hidden');
+                if (onConfirm) onConfirm();
+            };
+
+            cancelBtn.onclick = () => {
+                alertBox.classList.add('hidden');
+            };
+
+            lucide.createIcons();
+            alertBox.classList.remove('hidden');
+        }
+
+        function closeCustomAlert() {
+            document.getElementById('customAlert').classList.add('hidden');
+        }
+
+        // Trigger Image Dialog Input
+        function triggerFileInput() {
+            document.getElementById('imageInput').click();
+        }
+
+        // Handle Base64 image attachment encoding
+        function handleImageAttachment(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 1024 * 1024 * 4) { // 4MB restriction
+                showCustomAlert("File limit exceeded", "Please use images smaller than 4MB for faster processing times.", "error");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                appState.attachedImageBase64 = e.target.result;
+                
+                // Show in UI drawer
+                document.getElementById('attachedImagePreview').src = e.target.result;
+                document.getElementById('imageDrawer').classList.remove('hidden');
+                
+                // Switch to grok-2-vision if not already to prevent execution crash
+                const selectModel = document.getElementById('modelSelect');
+                if (selectModel.value !== 'grok-2-vision-latest') {
+                    selectModel.value = 'grok-2-vision-latest';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Remove Attached thumbnail
+        function removeAttachedImage() {
+            appState.attachedImageBase64 = null;
+            document.getElementById('imageInput').value = "";
+            document.getElementById('imageDrawer').classList.add('hidden');
+        }
+
+        // Setup Local History Managers
+        function createNewConversation() {
+            const newId = 'convo_' + Date.now();
+            const newConvo = {
+                id: newId,
+                title: "New Grok Session",
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                messages: []
+            };
+
+            appState.conversations.unshift(newConvo);
+            appState.activeConversationId = newId;
+            saveConversationsToStorage();
+            
+            renderConversationsList();
+            loadActiveConversation();
+
+            // Mobile sidebar hide helper if view starts
+            const sidebar = document.getElementById('sidebar');
+            if(!sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.add('-translate-x-full');
+                document.getElementById('sidebarOverlay').classList.add('hidden');
+            }
+        }
+
+        function switchConversation(convoId) {
+            appState.activeConversationId = convoId;
+            localStorage.setItem('grok_active_convo_id', convoId);
+            loadActiveConversation();
+            renderConversationsList();
+
+            // Auto-hide mobile drawers
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.add('hidden');
+        }
+
+        function deleteConversation(convoId, event) {
+            event.stopPropagation(); // prevent switching to it while deleting
+            
+            showCustomAlert("Confirm Deletion", "Are you sure you want to scrub this conversation session permanently?", "error", () => {
+                appState.conversations = appState.conversations.filter(c => c.id !== convoId);
+                
+                if (appState.activeConversationId === convoId) {
+                    appState.activeConversationId = appState.conversations.length > 0 ? appState.conversations[0].id : null;
+                }
+
+                if (appState.conversations.length === 0) {
+                    createNewConversation();
+                } else {
+                    saveConversationsToStorage();
+                    renderConversationsList();
+                    loadActiveConversation();
+                }
+            }, true);
+        }
+
+        function confirmClearHistory() {
+            showCustomAlert("Wipe Session Log", "You are about to delete all stored context within the active conversation. Proceed?", "error", () => {
+                const active = appState.conversations.find(c => c.id === appState.activeConversationId);
+                if (active) {
+                    active.messages = [];
+                    active.title = "Cleared Session";
+                    saveConversationsToStorage();
+                    loadActiveConversation();
+                    renderConversationsList();
+                }
+            }, true);
+        }
+
+        function saveConversationsToStorage() {
+            localStorage.setItem('grok_conversations', JSON.stringify(appState.conversations));
+            localStorage.setItem('grok_active_convo_id', appState.activeConversationId);
+        }
+
+        // Render Conversation Sidebar Items
+        function renderConversationsList() {
+            const listEl = document.getElementById('chatHistoryList');
+            listEl.innerHTML = "";
+
+            appState.conversations.forEach(convo => {
+                const isActive = convo.id === appState.activeConversationId;
+                
+                const item = document.createElement('div');
+                item.className = `group flex items-center justify-between px-3 py-2.5 rounded-xl text-xs cursor-pointer transition-all duration-150 ${
+                    isActive 
+                    ? 'bg-neutral-850 border border-neutral-700 bg-neutral-900 text-white font-semibold' 
+                    : 'text-neutral-400 hover:bg-neutral-900 hover:text-white'
+                }`;
+                item.setAttribute('onclick', `switchConversation('${convo.id}')`);
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                        <i data-lucide="message-square" class="w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-grokBlue' : 'text-neutral-500'}"></i>
+                        <span class="truncate pr-2">${convo.title}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                        <span class="text-[9px] text-neutral-600 font-mono group-hover:hidden">${convo.timestamp}</span>
+                        <button onclick="deleteConversation('${convo.id}', event)" class="hidden group-hover:block p-1 hover:bg-neutral-800 rounded text-neutral-500 hover:text-rose-400" title="Delete conversation">
+                            <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
+
+            lucide.createIcons();
+        }
+
+        // Loads messages from active conversation into UI Scroll Area
+        function loadActiveConversation() {
+            const active = appState.conversations.find(c => c.id === appState.activeConversationId);
+            const welcome = document.getElementById('welcomeScreen');
+            const messagesTarget = document.getElementById('chatMessages');
+            const tokenCounter = document.getElementById('tokenCounter');
+
+            messagesTarget.innerHTML = "";
+
+            if (!active || active.messages.length === 0) {
+                welcome.classList.remove('hidden');
+                tokenCounter.innerText = "0 msgs";
+                return;
+            }
+
+            welcome.classList.add('hidden');
+            tokenCounter.innerText = `${active.messages.length} msgs`;
+
+            active.messages.forEach((msg, idx) => {
+                if (msg.role === 'system') return; // Skip showing system configuration context
+                
+                const isUser = msg.role === 'user';
+                const container = document.createElement('div');
+                container.className = `flex gap-4 items-start ${isUser ? 'justify-end' : 'justify-start'}`;
+
+                // Process structured images if present
+                let imageHtml = "";
+                let textContent = "";
+
+                if (typeof msg.content === 'object' && Array.isArray(msg.content)) {
+                    msg.content.forEach(part => {
+                        if (part.type === 'text') {
+                            textContent += part.text;
+                        } else if (part.type === 'image_url') {
+                            imageHtml = `<div class="mb-2 max-w-sm rounded-xl overflow-hidden border border-grokBorder">
+                                <img src="${part.image_url.url}" alt="User upload thumbnail" class="max-h-60 object-contain w-full">
+                            </div>`;
+                        }
+                    });
+                } else {
+                    textContent = msg.content;
+                }
+
+                // Parse standard markdown safely via marked.js
+                const rawParsed = marked.parse(textContent);
+
+                const avatar = isUser 
+                    ? `<div class="w-8 h-8 rounded-lg bg-grokBlue text-white flex-shrink-0 flex items-center justify-center font-bold text-xs">U</div>`
+                    : `<div class="w-8 h-8 rounded-lg bg-white text-black flex-shrink-0 flex items-center justify-center font-black text-sm select-none border border-neutral-700">G</div>`;
+
+                container.innerHTML = `
+                    ${!isUser ? avatar : ''}
+                    <div class="flex-1 max-w-[85%] sm:max-w-[75%]">
+                        <div class="flex items-center gap-2 mb-1 justify-between">
+                            <span class="text-[11px] text-neutral-500 font-mono">
+                                ${isUser ? 'You' : 'Grok'} • ${new Date(msg.timestamp || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </span>
+                            <div class="flex items-center gap-1.5 opacity-40 hover:opacity-100 transition">
+                                <button onclick="copyMessageToClipboard('${idx}')" class="p-1 hover:bg-neutral-800 rounded text-neutral-400 hover:text-white" title="Copy to clipboard">
+                                    <i data-lucide="copy" class="w-3 h-3"></i>
+                                </button>
+                                ${!isUser ? `
+                                <button onclick="readTextAloud('${idx}')" class="p-1 hover:bg-neutral-800 rounded text-neutral-400 hover:text-white" title="Listen with Text to Speech">
+                                    <i data-lucide="volume-2" class="w-3 h-3"></i>
+                                </button>` : ''}
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-2xl border ${
+                            isUser 
+                            ? 'bg-neutral-900 border-grokBorder text-white' 
+                            : 'bg-neutral-900/45 border-neutral-800 markdown-body'
+                        }">
+                            ${imageHtml}
+                            <div class="prose prose-invert max-w-none text-sm break-words">${isUser ? textContent : rawParsed}</div>
+                        </div>
+                    </div>
+                    ${isUser ? avatar : ''}
+                `;
+
+                messagesTarget.appendChild(container);
+            });
+
+            // Trigger highlights logic for rendering scripts/languages
+            Prism.highlightAllUnder(messagesTarget);
+
+            // Re-render lucide elements
+            lucide.createIcons();
+
+            // Auto-scroll logic
+            scrollToBottom();
+        }
+
+        // Scroll helper
+        function scrollToBottom() {
+            const scroll = document.getElementById('chatScrollArea');
+            scroll.scrollTop = scroll.scrollHeight;
+        }
+
+        // Copy Clipboard Helper
+        function copyMessageToClipboard(idx) {
+            const active = appState.conversations.find(c => c.id === appState.activeConversationId);
+            if (!active) return;
+
+            let textToCopy = "";
+            const msg = active.messages[idx];
+
+            if (typeof msg.content === 'object' && Array.isArray(msg.content)) {
+                const textPart = msg.content.find(p => p.type === 'text');
+                textToCopy = textPart ? textPart.text : "";
+            } else {
+                textToCopy = msg.content;
+            }
+
+            // Standard fallback compliance using execCommand
+            const tempTextarea = document.createElement("textarea");
+            tempTextarea.value = textToCopy;
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            try {
+                document.execCommand("copy");
+                showCustomAlert("Success", "Copied text content to clipboard.", "success");
+            } catch (err) {
+                console.error("Copy operation unsuccessful", err);
+            }
+            document.body.removeChild(tempTextarea);
+        }
+
+        // Text to Speech Voice Feedback using browser speech synthesis
+        function readTextAloud(idx) {
+            const active = appState.conversations.find(c => c.id === appState.activeConversationId);
+            if (!active) return;
+
+            const msg = active.messages[idx];
+            let text = "";
+
+            if (typeof msg.content === 'object' && Array.isArray(msg.content)) {
+                text = msg.content.find(p => p.type === 'text')?.text || "";
+            } else {
+                text = msg.content;
+            }
+
+            if ('speechSynthesis' in window) {
+                // Cancel existing spoken phrases
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Fine-tune speech dynamics to sound a bit more metallic/Grok-like
+                utterance.pitch = 0.95; 
+                utterance.rate = 1.05;
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showCustomAlert("Unsupported", "Text to Speech is not supported on this browser version.", "info");
+            }
+        }
+
+        // Web Speech API Voice Recognition (STT) Setup
+        function initializeSpeech() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                document.getElementById('btnMic').style.display = 'none';
+                return;
+            }
+
+            appState.recognition = new SpeechRecognition();
+            appState.recognition.continuous = false;
+            appState.recognition.interimResults = false;
+            appState.recognition.lang = 'en-US';
+
+            appState.recognition.onstart = () => {
+                appState.isRecording = true;
+                const micIcon = document.getElementById('micIcon');
+                micIcon.className = "w-5 h-5 text-rose-500 animate-pulse";
+                document.getElementById('userInput').placeholder = "Listening attentively...";
+            };
+
+            appState.recognition.onresult = (event) => {
+                const resultText = event.results[0][0].transcript;
+                const input = document.getElementById('userInput');
+                input.value += (input.value ? ' ' : '') + resultText;
+                input.style.height = 'auto';
+                input.style.height = (input.scrollHeight) + 'px';
+            };
+
+            appState.recognition.onerror = (event) => {
+                console.error("Speech Recognition Error", event.error);
+                appState.isRecording = false;
+                resetMicUi();
+            };
+
+            appState.recognition.onend = () => {
+                appState.isRecording = false;
+                resetMicUi();
+            };
+        }
+
+        function toggleSpeechRecognition() {
+            if (!appState.recognition) return;
+
+            if (appState.isRecording) {
+                appState.recognition.stop();
+            } else {
+                appState.recognition.start();
+            }
+        }
+
+        function resetMicUi() {
+            const micIcon = document.getElementById('micIcon');
+            micIcon.className = "w-5 h-5 text-neutral-400";
+            document.getElementById('userInput').placeholder = "Ask Grok anything...";
+        }
+
+        // Primary chat workflow Submission Handler
+        async function handleChatSubmit(event) {
+            event.preventDefault();
+
+            if (appState.isGenerating) return;
+
+            const inputElement = document.getElementById('userInput');
+            const promptText = inputElement.value.trim();
+
+            if (!promptText && !appState.attachedImageBase64) {
+                return;
+            }
+
+            if (!appState.apiKey) {
+                toggleSettingsModal();
+                showCustomAlert("Authentication Required", "Please configure your xAI API Key inside Settings first.", "error");
+                return;
+            }
+
+            // Build structural user block payload
+            let messageContent;
+            if (appState.attachedImageBase64) {
+                messageContent = [
+                    { type: "text", text: promptText },
+                    { type: "image_url", image_url: { url: appState.attachedImageBase64 } }
+                ];
+            } else {
+                messageContent = promptText;
+            }
+
+            const newUserMessage = {
+                role: 'user',
+                content: messageContent,
+                timestamp: new Date().toISOString()
+            };
+
+            // Get current convo
+            const currentConvo = appState.conversations.find(c => c.id === appState.activeConversationId);
+            if (!currentConvo) return;
+
+            // Push message to local memory
+            currentConvo.messages.push(newUserMessage);
+
+            // Update convo title if it was default
+            if (currentConvo.title === "New Grok Session" || currentConvo.title === "Cleared Session") {
+                currentConvo.title = promptText.length > 28 ? promptText.slice(0, 25) + '...' : promptText;
+            }
+
+            // Cleanup inputs and refresh view immediately
+            inputElement.value = "";
+            inputElement.style.height = '40px';
+            removeAttachedImage();
+            
+            saveConversationsToStorage();
+            renderConversationsList();
+            loadActiveConversation();
+
+            // Set system prompt parameters based on chosen mode
+            const activeModel = document.getElementById('modelSelect').value;
+            let systemPromptText = "You are Grok, a highly advanced artificial intelligence model developed by xAI.";
+            
+            if (appState.grokMode === 'fun') {
+                systemPromptText += " Modeled after the Hitchhiker's Guide to the Galaxy, you possess a playful, witty, and rebellious streak. You have a touch of attitude and humor! Answer all user queries accordingly, providing accurate info but always with a smart and funny edge.";
+            } else {
+                systemPromptText += " Provide direct, factual, detailed, objective, and intellectually honest answers. Avoid ungrounded speculation or unnecessary fluff.";
+            }
+
+            // Setup loading UX status
+            appState.isGenerating = true;
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+            scrollToBottom();
+
+            // Perform REST Request towards x.ai api endpoints
+            try {
+                // Ensure correct history structures
+                const apiHistory = [];
+                
+                // Add System instruction context manually inside history
+                apiHistory.push({ role: "system", content: systemPromptText });
+
+                // Format entire dialog sequence cleanly for api validation rules
+                currentConvo.messages.forEach(msg => {
+                    apiHistory.push({
+                        role: msg.role,
+                        content: msg.content
+                    });
+                });
+
+                const payload = {
+                    model: activeModel,
+                    messages: apiHistory,
+                    stream: false,
+                    temperature: appState.grokMode === 'fun' ? 0.85 : 0.6
+                };
+
+                let response;
+                const requestHeaders = {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${appState.apiKey}`
+                };
+
+                const url = "https://api.x.ai/v1/chat/completions";
+
+                // Handle routing based on Proxy configs if CORS block occurs
+                if (appState.corsProxy === 'allorigins') {
+                    const encodedUrl = encodeURIComponent(url);
+                    response = await fetch(`https://api.allorigins.win/raw?url=${encodedUrl}`, {
+                        method: 'POST',
+                        headers: requestHeaders,
+                        body: JSON.stringify(payload)
+                    });
+                } else {
+                    response = await fetch(url, {
+                        method: 'POST',
+                        headers: requestHeaders,
+                        body: JSON.stringify(payload)
+                    });
+                }
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    const errMsg = errData.error?.message || `HTTP code ${response.status}`;
+                    throw new Error(errMsg);
+                }
+
+                const data = await response.json();
+                const grokOutput = data.choices?.[0]?.message?.content || "No message returned from API.";
+
+                // Inject response into local conversation history tree
+                currentConvo.messages.push({
+                    role: 'assistant',
+                    content: grokOutput,
+                    timestamp: new Date().toISOString()
+                });
+
+                saveConversationsToStorage();
+                loadActiveConversation();
+
+            } catch (error) {
+                console.error(error);
+                showCustomAlert(
+                    "Connection / API Issue", 
+                    `${error.message}. (Tip: If you run into CORS errors, switch the CORS workaround to "Proxy via AllOrigins" in Settings).`, 
+                    "error"
+                );
+            } finally {
+                appState.isGenerating = false;
+                document.getElementById('loadingIndicator').classList.add('hidden');
+                scrollToBottom();
+            }
         }
     </script>
 </body>
 </html>
+
+```
