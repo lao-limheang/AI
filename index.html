@@ -1,1108 +1,922 @@
-```html
 <!DOCTYPE html>
-<html lang="en" class="dark h-full">
+<html lang="km">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grok AI - Interactive Sandbox</title>
-    
-    <!-- Tailwind CSS CDN -->
+    <title>Staff AI Bot Simulator & Manager</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        grokDark: '#000000',
-                        grokGray: '#0F1419',
-                        grokBorder: '#2F3336',
-                        grokBlue: '#1D9BF0',
-                        grokAccent: '#3a86ff',
-                        grokFun: '#FF9F1C'
-                    },
-                    fontFamily: {
-                        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- Lucide Icons for high-fidelity icons -->
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Markdown parsing & Code Highlighting -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-
+    <!-- Khmer Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom scrollbar behavior for a clean terminal feel */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        body {
+            font-family: 'Kantumruy Pro', 'Inter', sans-serif;
         }
-        ::-webkit-scrollbar-track {
-            background: #000000;
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 5px;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #2F3336;
-            border-radius: 3px;
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #1D9BF0;
-        }
-        
-        /* Premium custom typography overrides inside rendered Markdown */
-        .markdown-body {
-            color: #E7E9EA;
-            line-height: 1.625;
-        }
-        .markdown-body p {
-            margin-bottom: 1rem;
-        }
-        .markdown-body pre {
-            background-color: #0F1419 !important;
-            border: 1px solid #2F3336;
-            border-radius: 12px;
-            padding: 1rem;
-            margin: 1rem 0;
-            overflow-x: auto;
-        }
-        .markdown-body code {
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
-            font-size: 0.9em;
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 0.2rem 0.4rem;
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
             border-radius: 4px;
-        }
-        .markdown-body pre code {
-            background-color: transparent !important;
-            padding: 0;
-            border-radius: 0;
-        }
-        .markdown-body ul, .markdown-body ol {
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
-            list-style-type: disc;
-        }
-        .markdown-body ol {
-            list-style-type: decimal;
-        }
-        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
-            font-weight: 700;
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: #FFFFFF;
-        }
-        .markdown-body h1 { font-size: 1.5rem; }
-        .markdown-body h2 { font-size: 1.25rem; }
-        .markdown-body h3 { font-size: 1.1rem; }
-        
-        /* Shimmer effect for loaders */
-        @keyframes shimmer {
-            0% { opacity: 0.4; }
-            50% { opacity: 0.8; }
-            100% { opacity: 0.4; }
-        }
-        .animate-shimmer {
-            animation: shimmer 1.5s infinite ease-in-out;
         }
     </style>
 </head>
-<body class="bg-grokDark text-[#E7E9EA] h-full flex flex-col overflow-hidden font-sans">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
 
-    <!-- Top Navigation Bar -->
-    <header class="h-16 border-b border-grokBorder bg-grokDark/90 backdrop-blur flex items-center justify-between px-4 z-10 flex-shrink-0">
-        <div class="flex items-center gap-3">
-            <button id="sidebarToggle" class="p-2 hover:bg-grokBorder/50 rounded-full transition lg:hidden" aria-label="Toggle Sidebar">
-                <i data-lucide="menu" class="w-5 h-5 text-white"></i>
-            </button>
-            <div class="flex items-center gap-2">
-                <!-- Grok Stylized Icon -->
-                <div class="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center font-black text-xl tracking-tighter select-none">
-                    G
+    <!-- Header Section -->
+    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-900/30">
+                    <i data-lucide="bot" class="w-8 h-8"></i>
                 </div>
                 <div>
-                    <span class="font-bold text-white tracking-wide text-lg flex items-center gap-1.5">
-                        Grok AI 
-                        <span id="grokBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700 font-normal">Regular</span>
-                    </span>
-                    <p class="text-[10px] text-neutral-500 font-mono">powered by xAI</p>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Staff AI Bot Simulator</h1>
+                    <p class="text-xs text-slate-400">ប្រព័ន្ធត្រួតពិនិត្យ និងសាកល្បង AI ឆ្លើយសំណួរទូទៅ និងទិន្នន័យបុគ្គលិក</p>
                 </div>
             </div>
-        </div>
-
-        <!-- Middle: Grok Mode Switcher -->
-        <div class="hidden sm:flex items-center bg-neutral-900 p-1 rounded-full border border-grokBorder">
-            <button onclick="setGrokMode('regular')" id="btnModeRegular" class="px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 bg-white text-black shadow-sm">
-                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Regular
-            </button>
-            <button onclick="setGrokMode('fun')" id="btnModeFun" class="px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 text-neutral-400 hover:text-white">
-                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Fun Mode
-            </button>
-        </div>
-
-        <!-- Right Side Controls -->
-        <div class="flex items-center gap-2">
-            <!-- Settings trigger button -->
-            <button onclick="toggleSettingsModal()" class="p-2 hover:bg-grokBorder/50 rounded-full text-neutral-400 hover:text-white transition" title="API Settings">
-                <i data-lucide="settings" class="w-5 h-5"></i>
-            </button>
-            <!-- Clear chat logs -->
-            <button onclick="confirmClearHistory()" class="p-2 hover:bg-grokBorder/50 rounded-full text-neutral-400 hover:text-rose-400 transition" title="Reset Current Chat">
-                <i data-lucide="trash-2" class="w-5 h-5"></i>
-            </button>
+            <div class="flex items-center gap-3">
+                <!-- API Key Configuration Modal Trigger -->
+                <button onclick="toggleApiKeyModal()" class="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-semibold rounded-lg transition-all border border-slate-600">
+                    <i data-lucide="key" class="w-4 h-4 text-amber-400"></i>
+                    <span>ភ្ជាប់ Gemini API Key ពិត</span>
+                </button>
+                <span class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-semibold border border-emerald-500/20 animate-pulse">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    ម៉ាស៊ីនដំណើរការស្រួល
+                </span>
+            </div>
         </div>
     </header>
 
-    <!-- App Body Container -->
-    <div class="flex flex-1 overflow-hidden relative">
-
-        <!-- Sidebar (History and Model Preferences) -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full lg:relative lg:translate-x-0 transition-transform duration-300 ease-in-out z-20 w-80 bg-grokDark border-r border-grokBorder flex flex-col justify-between flex-shrink-0">
-            <!-- Sidebar Header -->
-            <div class="p-4 border-b border-grokBorder flex flex-col gap-4">
-                <div class="flex items-center justify-between">
-                    <span class="text-sm font-bold uppercase tracking-wider text-neutral-500">Workspace Settings</span>
-                    <button id="sidebarClose" class="lg:hidden p-1.5 hover:bg-neutral-800 rounded-full">
-                        <i data-lucide="x" class="w-4 h-4 text-white"></i>
-                    </button>
-                </div>
-                
-                <!-- xAI Model Selector -->
-                <div>
-                    <label class="block text-xs text-neutral-400 font-semibold mb-1.5">Active xAI Model</label>
-                    <select id="modelSelect" class="w-full bg-neutral-900 border border-grokBorder rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-grokBlue font-mono">
-                        <option value="grok-2-latest" selected>grok-2-latest</option>
-                        <option value="grok-2">grok-2</option>
-                        <option value="grok-2-vision-latest">grok-2-vision-latest 👁️</option>
-                        <option value="grok-beta">grok-beta</option>
-                    </select>
-                    <p class="text-[10px] text-neutral-500 mt-1">Select vision models to enable image attachments.</p>
-                </div>
-            </div>
-
-            <!-- Chat History Panel -->
-            <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-neutral-500">Local Conversations</span>
-                    <button onclick="createNewConversation()" class="text-xs font-medium text-grokBlue hover:underline flex items-center gap-1">
-                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> New Chat
-                    </button>
-                </div>
-                
-                <!-- Chat list hooks -->
-                <div id="chatHistoryList" class="flex flex-col gap-1.5">
-                    <!-- Dynamic Items injected here -->
-                </div>
-            </div>
-
-            <!-- Footer Meta & API Status -->
-            <div class="p-4 border-t border-grokBorder bg-neutral-950/50">
-                <div class="flex items-center justify-between text-xs text-neutral-400">
-                    <span class="flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Key Active
+    <!-- Main Workspace Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- LEFT PANEL: Dashboard & Staff Data Editor (5 Columns) -->
+        <section class="lg:col-span-5 flex flex-col gap-6">
+            
+            <!-- Tab Buttons -->
+            <div class="flex bg-slate-800 p-1.5 rounded-xl border border-slate-700">
+                <button id="btn-tab-staff" onclick="switchTab('staff')" class="flex-1 py-2 text-center text-sm font-bold rounded-lg transition-all bg-blue-600 text-white">
+                    <span class="flex items-center justify-center gap-2">
+                        <i data-lucide="users" class="w-4 h-4"></i> ទិន្នន័យបុគ្គលិក (7 នាក់)
                     </span>
-                    <span id="tokenCounter" class="font-mono text-[10px]">0 msgs</span>
-                </div>
-                <!-- Mini warning banner about CORS browser limitations -->
-                <div class="mt-2 p-2 bg-neutral-900/50 rounded-lg border border-neutral-800 text-[10px] text-neutral-400 leading-snug">
-                    Note: Browser direct connections require CORS allowance. If blocked, utilize a proxy or local container.
-                </div>
+                </button>
+                <button id="btn-tab-pricing" onclick="switchTab('pricing')" class="flex-1 py-2 text-center text-sm font-bold rounded-lg transition-all text-slate-400 hover:text-white">
+                    <span class="flex items-center justify-center gap-2">
+                        <i data-lucide="calculator" class="w-4 h-4"></i> គណនាថ្លៃសេវា & Tokens
+                    </span>
+                </button>
             </div>
-        </aside>
 
-        <!-- Overlay for mobile sidebar -->
-        <div id="sidebarOverlay" class="hidden fixed inset-0 bg-black/65 z-10 lg:hidden"></div>
+            <!-- Tab Content 1: Staff Data Editor -->
+            <div id="tab-staff" class="bg-slate-800 rounded-2xl border border-slate-700 p-5 flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="database" class="w-5 h-5 text-blue-400"></i>
+                        ទិន្នន័យបុគ្គលិកក្នុង Database
+                    </h2>
+                    <span class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full font-semibold border border-slate-600">សរុប ៧ នាក់</span>
+                </div>
+                <p class="text-xs text-slate-400 -mt-2">អ្នកអាចផ្លាស់ប្តូរទិន្នន័យខាងក្រោមនេះ ដើម្បីឱ្យ AI ឆ្លើយតបទៅតាមអ្វីដែលអ្នកបានកែប្រែ។</p>
 
-        <!-- Chat Workspace Panel -->
-        <main class="flex-1 flex flex-col bg-grokDark overflow-hidden relative">
-
-            <!-- Active Conversation Messages View -->
-            <div id="chatScrollArea" class="flex-1 overflow-y-auto px-4 py-6 md:px-8 space-y-6">
-                
-                <!-- Welcome Banner (Shown only when zero messages exist) -->
-                <div id="welcomeScreen" class="h-full flex flex-col items-center justify-center text-center max-w-xl mx-auto py-12 px-4">
-                    <div class="w-16 h-16 rounded-2xl bg-white text-black flex items-center justify-center font-black text-4xl mb-6 select-none shadow-xl">
-                        G
-                    </div>
-                    <h1 class="text-3xl font-extrabold text-white tracking-tight mb-2">I am Grok.</h1>
-                    <p class="text-neutral-400 text-sm mb-8 leading-relaxed">
-                        Constructed by xAI. Empowered with genuine curiosity and structured answers. Feel free to activate <span class="text-grokFun font-bold">Fun Mode</span> for some wit and attitude.
-                    </p>
-
-                    <!-- Fast Interaction Prompt Chips -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                        <button onclick="usePromptChip('Draft a funny, sarcastic tweet responding to artificial intelligence replacing developers.')" class="p-4 bg-neutral-900 hover:bg-neutral-800 border border-grokBorder rounded-xl text-left text-xs transition duration-200">
-                            <span class="font-bold text-white block mb-1">🐦 Sarcastic Tweet</span>
-                            Write a witty reply to tech trends...
-                        </button>
-                        <button onclick="usePromptChip('Explain the concept of quantum computing superpositions using an analogy about a rotating coin.')" class="p-4 bg-neutral-900 hover:bg-neutral-800 border border-grokBorder rounded-xl text-left text-xs transition duration-200">
-                            <span class="font-bold text-white block mb-1">🌀 Quantum Superposition</span>
-                            Learn advanced ideas intuitively...
-                        </button>
-                        <button onclick="usePromptChip('Write a clean Python script using asyncio to scrape multiple mock URLs simultaneously with rich logging.')" class="p-4 bg-neutral-900 hover:bg-neutral-800 border border-grokBorder rounded-xl text-left text-xs transition duration-200">
-                            <span class="font-bold text-white block mb-1">🐍 Asyncio Web Scraper</span>
-                            Generate optimized Python boilerplate...
-                        </button>
-                        <button onclick="usePromptChip('Invent a unique sci-fi concept where memories are used as a luxury currency.')" class="p-4 bg-neutral-900 hover:bg-neutral-800 border border-grokBorder rounded-xl text-left text-xs transition duration-200">
-                            <span class="font-bold text-white block mb-1">🌌 Memory Currency Concept</span>
-                            Brainstorm speculative fiction ideas...
-                        </button>
-                    </div>
+                <!-- Staff List with inputs -->
+                <div class="space-y-3 max-h-[460px] overflow-y-auto pr-1 scrollbar-thin" id="staff-list-container">
+                    <!-- Loaded dynamically via JS -->
                 </div>
 
-                <!-- Active Message Logs Target -->
-                <div id="chatMessages" class="max-w-3xl mx-auto space-y-6"></div>
-
-                <!-- API Response Loader Placeholder -->
-                <div id="loadingIndicator" class="hidden max-w-3xl mx-auto flex gap-4 items-start">
-                    <div class="w-8 h-8 rounded-lg bg-neutral-800 flex-shrink-0 flex items-center justify-center border border-neutral-700">
-                        <span class="text-xs font-bold text-neutral-300">G</span>
-                    </div>
-                    <div class="flex-1 bg-neutral-900/60 p-4 rounded-xl border border-neutral-800 space-y-2">
-                        <div class="h-4 bg-neutral-800 rounded w-1/3 animate-pulse"></div>
-                        <div class="h-3 bg-neutral-800 rounded w-5/6 animate-pulse"></div>
-                        <div class="h-3 bg-neutral-800 rounded w-2/3 animate-pulse"></div>
-                    </div>
+                <div class="pt-2 border-t border-slate-700 flex justify-end">
+                    <button onclick="resetStaffData()" class="text-xs text-slate-400 hover:text-rose-400 flex items-center gap-1 transition-colors">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> កំណត់ឡើងវិញទៅទិន្នន័យដើម
+                    </button>
                 </div>
             </div>
 
-            <!-- Image preview drawer (appears when user attaches a file) -->
-            <div id="imageDrawer" class="hidden px-4 py-2 border-t border-grokBorder bg-neutral-950/70 max-w-3xl mx-auto w-full flex items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="relative w-16 h-16 rounded overflow-hidden bg-neutral-900 border border-grokBorder">
-                        <img id="attachedImagePreview" src="" alt="Thumbnail" class="w-full h-full object-cover">
-                        <button onclick="removeAttachedImage()" class="absolute top-1 right-1 bg-black/80 hover:bg-black rounded-full p-0.5 text-rose-500">
-                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                        </button>
+            <!-- Tab Content 2: Pricing & Tokens Calculator -->
+            <div id="tab-pricing" class="bg-slate-800 rounded-2xl border border-slate-700 p-5 hidden flex flex-col gap-5">
+                <h2 class="text-base font-bold text-white flex items-center gap-2">
+                    <i data-lucide="coins" class="w-5 h-5 text-amber-400"></i>
+                    របាយការណ៍ចំណាយ និងទំហំ Tokens
+                </h2>
+
+                <!-- Token Tracker Details -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/50">
+                        <div class="text-xs text-slate-400 mb-1 flex items-center gap-1">
+                            <i data-lucide="arrow-up-right" class="w-3 h-3 text-blue-400"></i> Tokens ផ្ញើទៅ (Input)
+                        </div>
+                        <div class="text-2xl font-bold text-blue-400" id="total-input-tokens">0</div>
+                        <div class="text-[10px] text-slate-500 mt-1">បូករួមទាំង Context Data</div>
                     </div>
-                    <div>
-                        <span class="text-xs font-semibold text-white block">Image Attached</span>
-                        <span class="text-[10px] text-neutral-400">Grok-2-Vision model will process this.</span>
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/50">
+                        <div class="text-xs text-slate-400 mb-1 flex items-center gap-1">
+                            <i data-lucide="arrow-down-left" class="w-3 h-3 text-emerald-400"></i> Tokens ឆ្លើយមក (Output)
+                        </div>
+                        <div class="text-2xl font-bold text-emerald-400" id="total-output-tokens">0</div>
+                        <div class="text-[10px] text-slate-500 mt-1">ផ្អែកលើប្រវែងសារឆ្លើយតប</div>
                     </div>
                 </div>
-                <div class="text-[10px] text-amber-500 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20">
-                    Switch to grok-2-vision-latest model!
-                </div>
-            </div>
 
-            <!-- Chat Footer Input Form Area -->
-            <div class="p-4 border-t border-grokBorder bg-grokDark/90 backdrop-blur flex-shrink-0">
-                <div class="max-w-3xl mx-auto relative">
-                    <form id="chatForm" onsubmit="handleChatSubmit(event)" class="relative flex items-end gap-2 bg-neutral-900 border border-grokBorder rounded-2xl p-2 focus-within:border-grokBlue transition">
-                        
-                        <!-- File Upload input hidden -->
-                        <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageAttachment(event)">
-                        
-                        <!-- File Attachment Action Pin -->
-                        <button type="button" onclick="triggerFileInput()" class="p-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl transition" title="Attach image">
-                            <i data-lucide="paperclip" class="w-5 h-5"></i>
-                        </button>
+                <!-- Cumulative Cost Tracker -->
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 space-y-3">
+                    <h3 class="text-xs font-semibold uppercase text-slate-400 tracking-wider">ប្រៀបធៀបតម្លៃរវាង DeepSeek នឹង Gemini</h3>
+                    
+                    <!-- DeepSeek Card -->
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                            <div>
+                                <span class="text-sm font-semibold text-white">DeepSeek V4 Flash</span>
+                                <p class="text-[10px] text-slate-400">Input: $0.14/1M, Output: $0.28/1M</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-base font-bold text-blue-400" id="cost-deepseek">$0.000000</span>
+                            <p class="text-[9px] text-slate-500">ការចំណាយសរុប (USD)</p>
+                        </div>
+                    </div>
 
-                        <!-- STT (Speech to text) Feature -->
-                        <button type="button" onclick="toggleSpeechRecognition()" id="btnMic" class="p-2.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-xl transition" title="Voice Input">
-                            <i data-lucide="mic" id="micIcon" class="w-5 h-5"></i>
-                        </button>
-
-                        <!-- Text Input -->
-                        <textarea id="userInput" rows="1" placeholder="Ask Grok anything..." class="flex-1 bg-transparent border-0 text-white placeholder-neutral-500 focus:ring-0 text-sm resize-none py-2.5 focus:outline-none min-h-[40px] max-h-[160px]"></textarea>
-
-                        <!-- Submit Button -->
-                        <button type="submit" id="btnSubmit" class="p-2.5 bg-white text-black hover:bg-neutral-200 rounded-xl transition font-bold" title="Send message">
-                            <i data-lucide="arrow-up" class="w-5 h-5"></i>
-                        </button>
-                    </form>
-
-                    <div class="flex items-center justify-between px-2 mt-2">
-                        <p class="text-[10px] text-neutral-500">
-                            Press Enter to send. Shift+Enter for new line.
-                        </p>
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            <span class="text-[10px] font-mono text-neutral-400">Endpoint: api.x.ai</span>
+                    <!-- Gemini Card -->
+                    <div class="flex justify-between items-center pt-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                            <div>
+                                <span class="text-sm font-semibold text-white">Gemini 2.5 Flash</span>
+                                <p class="text-[10px] text-slate-400">Input: $0.075/1M, Output: $0.30/1M</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-base font-bold text-indigo-400" id="cost-gemini">$0.000000</span>
+                            <p class="text-[9px] text-slate-500">ការចំណាយសរុប (USD)</p>
                         </div>
                     </div>
                 </div>
+
+                <!-- Free Tier Tracker Card -->
+                <div class="bg-indigo-950/40 border border-indigo-900/50 rounded-xl p-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xs font-bold text-indigo-300 uppercase flex items-center gap-1.5">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i> Gemini Free Tier Limit
+                        </h4>
+                        <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">ឥតគិតថ្លៃ</span>
+                    </div>
+                    
+                    <!-- Progress Bar for Request Daily limit -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Requests ក្នុងថ្ងៃនេះ (Max 1,000)</span>
+                            <span class="font-bold text-indigo-400" id="lbl-request-daily">0 / 1,000</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="bar-request-daily" class="h-full bg-indigo-500 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar for Request Minute limit -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Requests ក្នុងនាទីនេះ (Max 15)</span>
+                            <span class="font-bold text-indigo-400" id="lbl-request-minute">0 / 15</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="bar-request-minute" class="h-full bg-indigo-400 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-indigo-300/80 leading-relaxed italic">
+                        * ប្រសិនបើអ្នកប្រើកម្រិត Free Tier របស់ Gemini នោះអ្នកនឹងមិនចាំបាច់បង់ប្រាក់សូម្បីតែ ១ សេនឡើយ ឱ្យតែការប្រើប្រាស់មិនលើសពីលក្ខខណ្ឌកំណត់ខាងលើ!
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT PANEL: Telegram Chat Simulator (7 Columns) -->
+        <section class="lg:col-span-7 flex flex-col bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden min-h-[500px]">
+            
+            <!-- Telegram Header -->
+            <div class="bg-slate-700/50 border-b border-slate-700 px-4 py-3 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-tr from-sky-400 to-blue-600 rounded-full flex items-center justify-center font-bold text-white text-lg shadow-inner">
+                        TG
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">គ្រុបការងារបុគ្គលិក (Telegram Group)</h3>
+                        <p class="text-[10px] text-sky-400 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                            សមាជិក ៧ នាក់ និង AI Bot ១ នាក់ កំពុងអនឡាញ (ឆ្លើយបានសំណួរទូទៅ + System)
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <!-- Clear Chat -->
+                    <button onclick="clearChat()" class="p-2 hover:bg-slate-600 text-slate-300 hover:text-rose-400 rounded-lg transition-colors" title="លុបការសន្ទនា">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
             </div>
 
-        </main>
-    </div>
-
-    <!-- API Settings Modal Box -->
-    <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="bg-neutral-900 border border-grokBorder rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div class="px-6 py-4 border-b border-grokBorder flex items-center justify-between">
-                <h3 class="font-bold text-white text-lg flex items-center gap-2">
-                    <i data-lucide="key-round" class="w-5 h-5 text-grokBlue"></i> xAI Configuration
-                </h3>
-                <button onclick="toggleSettingsModal()" class="p-1 hover:bg-neutral-800 rounded-full">
-                    <i data-lucide="x" class="w-5 h-5 text-neutral-400 hover:text-white"></i>
-                </button>
+            <!-- Chat Area Scroll Container -->
+            <div id="chat-messages-container" class="flex-grow p-4 space-y-4 overflow-y-auto max-h-[480px] bg-slate-900/40 scrollbar-thin">
+                <!-- Welcome/Instructions Message -->
+                <div class="flex justify-center my-2">
+                    <span class="bg-slate-800/80 text-slate-300 text-[10px] px-3.5 py-1.5 rounded-full border border-slate-700/50 text-center leading-relaxed max-w-[85%]">
+                        👋 បុគ្គលិកអាចសួរនាំ AI Bot ដោយប្រើពាក្យបញ្ជា <strong class="text-sky-400">/ai</strong> ពីមុខសំណួរ។ Bot អាចឆ្លើយសំណួរក្នុងប្រព័ន្ធផង និងសំណួរទូទៅផង!
+                    </span>
+                </div>
+                <!-- Predefined Chat Starter Message from Bot -->
+                <div class="flex items-start gap-2.5 max-w-[85%]">
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0 text-white shadow">
+                        <i data-lucide="bot" class="w-4 h-4"></i>
+                    </div>
+                    <div class="bg-slate-800 text-slate-200 p-3 rounded-2xl rounded-tl-none border border-slate-700 text-xs leading-relaxed space-y-1">
+                        <div class="font-bold text-sky-400 text-[10px]">ជំនួយការ AI (Bot)</div>
+                        <p>ជម្រាបសួរគ្រប់គ្នា! ខ្ញុំជាជំនួយការ AI សកលប្រចាំហាង។ ក្រៅពីដឹងព័ត៌មានបុគ្គលិកទាំង ៧ នាក់ច្បាស់លាស់ ខ្ញុំក៏អាចជួយឆ្លើយសំណួរទូទៅ ជួយបកប្រែ សរសេរលិខិត ឬដោះស្រាយការងារផ្សេងៗបានយ៉ាងរហ័សផងដែរ។ សាកល្បងសួរខ្ញុំដោយប្រើ <strong class="text-sky-400">/ai [សំណួរ]</strong> បានភ្លាមៗ!</p>
+                        <div class="text-[9px] text-slate-400 text-right pt-1">10:20 AM</div>
+                    </div>
+                </div>
             </div>
-            <div class="p-6 space-y-4">
+
+            <!-- Suggested Commands Grid (Quick Click) -->
+            <div class="px-4 py-3 bg-slate-800 border-t border-slate-700/60 shrink-0 space-y-2.5">
+                <!-- System Questions Row -->
                 <div>
-                    <label class="block text-xs font-semibold text-neutral-400 mb-1.5">xAI API Key</label>
-                    <div class="relative">
-                        <input type="password" id="apiKeyInput" class="w-full bg-black border border-grokBorder rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-grokBlue focus:ring-1 focus:ring-grokBlue">
-                        <button onclick="toggleKeyVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white">
-                            <i data-lucide="eye" id="eyeIcon" class="w-4 h-4"></i>
+                    <span class="text-[9px] font-bold text-sky-400 uppercase tracking-wider block mb-1.5 flex items-center gap-1">
+                        <i data-lucide="database" class="w-3.5 h-3.5"></i> សំណួរក្នុងប្រព័ន្ធ (System Database)៖
+                    </span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="clickSampleQuestion('/ai heang dayoffថ្ងៃណា?')" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1 rounded-lg border border-slate-600 transition-colors">
+                            heang dayoffថ្ងៃណា?
+                        </button>
+                        <button onclick="clickSampleQuestion('/ai ថ្ងៃនេះនរណាខ្លះចូលធ្វើការយឺត?')" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1 rounded-lg border border-slate-600 transition-colors">
+                            នរណាខ្លះចូលធ្វើការយឺត?
+                        </button>
+                        <button onclick="clickSampleQuestion('/ai សរុបវត្តមានបុគ្គលិកទាំងអស់ប្រចាំថ្ងៃ')" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1 rounded-lg border border-slate-600 transition-colors">
+                            សរុបវត្តមានបុគ្គលិក
                         </button>
                     </div>
-                    <p class="text-[11px] text-neutral-500 mt-1.5 leading-relaxed">
-                        Your key is saved safely in local memory. Keep it secure and private.
-                    </p>
                 </div>
 
+                <!-- General Questions Row -->
+                <div class="pt-1.5 border-t border-slate-700/40">
+                    <span class="text-[9px] font-bold text-purple-400 uppercase tracking-wider block mb-1.5 flex items-center gap-1">
+                        <i data-lucide="globe" class="w-3.5 h-3.5"></i> សំណួរទូទៅក្រៅប្រព័ន្ធ (General Knowledge)៖
+                    </span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="clickSampleQuestion('/ai តើភ្នំពេញជារាជធានីនៃប្រទេសណា?')" class="text-[10px] bg-purple-950/40 hover:bg-purple-900/40 text-purple-200 px-2.5 py-1 rounded-lg border border-purple-800/40 transition-colors">
+                            តើភ្នំពេញជារាជធានីនៃប្រទេសណា?
+                        </button>
+                        <button onclick="clickSampleQuestion('/ai សរសេរលិខិតសុំច្បាប់សម្រាកព្យាបាលជំងឺខ្លីមួយឲ្យខ្ញុំ')" class="text-[10px] bg-purple-950/40 hover:bg-purple-900/40 text-purple-200 px-2.5 py-1 rounded-lg border border-purple-800/40 transition-colors">
+                            សរសេរលិខិតសុំច្បាប់សម្រាក...
+                        </button>
+                        <button onclick="clickSampleQuestion('/ai Translate to English: ខ្ញុំស្រឡាញ់ប្រទេសកម្ពុជា')" class="text-[10px] bg-purple-950/40 hover:bg-purple-900/40 text-purple-200 px-2.5 py-1 rounded-lg border border-purple-800/40 transition-colors">
+                            បកប្រែជាភាសាអង់គ្លេស...
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Telegram Input Area -->
+            <div class="p-4 bg-slate-900 border-t border-slate-700 flex flex-col gap-2.5 shrink-0">
+                <div class="flex items-center gap-3">
+                    <!-- Dropdown to select simulated sender -->
+                    <div class="relative">
+                        <select id="sender-select" class="bg-slate-800 text-slate-200 text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                            <option value="Heang">ហៀង (Heang)</option>
+                            <option value="Thida">ធីតា (Thida)</option>
+                            <option value="Borey">បុរី (Borey)</option>
+                            <option value="Dara">ដារ៉ា (Dara)</option>
+                            <option value="Sophy">សុភី (Sophy)</option>
+                            <option value="Neary" selected>នារី (Neary)</option>
+                            <option value="Seyha">សីហា (Seyha)</option>
+                        </select>
+                    </div>
+
+                    <!-- Chat input field -->
+                    <div class="flex-grow relative">
+                        <input type="text" id="chat-input" onkeydown="handleInputKeydown(event)" placeholder="វាយសំណួររបស់អ្នកនៅទីនេះ... (កុំភ្លេចប្រើ /ai ពីមុខ)" class="w-full bg-slate-800 text-slate-100 placeholder-slate-500 text-xs px-4 py-2.5 pr-10 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <span id="ai-prefix-badge" class="absolute right-3 top-2.5 text-[9px] font-bold text-sky-400 bg-sky-950/50 px-1.5 py-0.5 rounded border border-sky-900/50">/ai mode</span>
+                    </div>
+
+                    <!-- Send button -->
+                    <button onclick="sendChatMessage()" class="p-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-900/20 active:scale-95 transition-all">
+                        <i data-lucide="send" class="w-4.5 h-4.5"></i>
+                    </button>
+                </div>
+                
+                <!-- Bottom Status info -->
+                <div class="flex justify-between items-center text-[10px] text-slate-500">
+                    <span id="response-status">របៀបដំណើរការ៖ <strong class="text-amber-500" id="lbl-api-mode">Mock Mode (ឥតគិតថ្លៃ)</strong></span>
+                    <span>ប្រព័ន្ធ AI ដំណើរការដោយ DeepSeek / Gemini Logic</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- POPUP MODAL: Configure Custom Gemini API Key -->
+    <div id="api-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative animate-in fade-in duration-200">
+            <button onclick="toggleApiKeyModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-2 bg-amber-500/10 text-amber-400 rounded-xl">
+                    <i data-lucide="key-round" class="w-6 h-6"></i>
+                </div>
                 <div>
-                    <label class="block text-xs font-semibold text-neutral-400 mb-1.5">CORS Routing Workaround</label>
-                    <select id="corsProxySelect" class="w-full bg-black border border-grokBorder rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-grokBlue">
-                        <option value="direct">Direct Connections (Standard browser calls)</option>
-                        <option value="allorigins">Proxy via AllOrigins (CORS evasion helper)</option>
-                    </select>
-                    <p class="text-[11px] text-neutral-500 mt-1.5 leading-relaxed">
-                        If calls fail due to browser CORS policies, switch to the Proxy setting to route requests correctly.
-                    </p>
+                    <h3 class="text-base font-bold text-white">តភ្ជាប់ Gemini API Key ផ្ទាល់ខ្លួន</h3>
+                    <p class="text-xs text-slate-400">តេស្តជាមួយ AI ពិតប្រាកដរបស់ Google</p>
                 </div>
             </div>
-            <div class="px-6 py-4 border-t border-grokBorder bg-neutral-950 flex justify-end gap-3">
-                <button onclick="toggleSettingsModal()" class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-sm font-semibold transition">
-                    Close
-                </button>
-                <button onclick="saveApiKeySettings()" class="px-4 py-2 bg-grokBlue hover:bg-grokBlue/90 text-white rounded-xl text-sm font-semibold transition">
-                    Save Changes
-                </button>
+
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                ប្រសិនបើអ្នកចង់សាកល្បងឱ្យ AI ឆ្លើយតបពិតប្រាកដ (មិនមែនជាការឆ្លើយតបដែលប្រព័ន្ធបង្កើតឡើងដើម្បីត្រាប់តាម) អ្នកអាចបង្កើត API Key ដោយសេរីនៅលើ <a href="https://aistudio.google.com/" target="_blank" class="text-sky-400 underline hover:text-sky-300">Google AI Studio</a> រួចយកមកបញ្ចូលនៅខាងក្រោមនេះ។
+            </p>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Gemini API Key</label>
+                    <input type="password" id="txt-api-key" placeholder="AIzaSy..." class="w-full bg-slate-900 text-slate-100 placeholder-slate-600 text-xs px-4 py-2.5 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="bg-indigo-950/40 p-3 rounded-xl border border-indigo-900/50 text-[10px] text-indigo-300 leading-relaxed">
+                    🔐 **សុវត្ថិភាពខ្ពស់បំផុត៖** API Key របស់អ្នកនឹងត្រូវរក្សាទុកតែនៅក្នុង "Memory" នៃ Browser របស់អ្នកតែប៉ុណ្ណោះ។ គ្មាននរណាម្នាក់អាចមើលឃើញ ឬលួចយកទៅបានឡើយ។
+                </div>
+
+                <div class="flex gap-3 justify-end pt-2">
+                    <button onclick="disableRealApi()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold rounded-lg transition-colors">
+                        បិទវិញ (Mock Mode)
+                    </button>
+                    <button onclick="saveApiKey()" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-extrabold rounded-lg transition-colors shadow-lg shadow-amber-900/20">
+                        រក្សាទុក & ដំណើរការ
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Alert / Confirmation Dialog Popups -->
-    <div id="customAlert" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-        <div class="bg-neutral-900 border border-grokBorder rounded-2xl max-w-sm w-full p-6 text-center shadow-xl">
-            <div id="alertIconContainer" class="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-            </div>
-            <h4 id="alertTitle" class="font-bold text-white text-lg mb-2">Notice</h4>
-            <p id="alertMessage" class="text-neutral-400 text-sm mb-6 leading-relaxed"></p>
-            <div class="flex justify-center gap-3">
-                <button id="alertCancelBtn" onclick="closeCustomAlert()" class="hidden px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-sm font-semibold transition">
-                    Cancel
-                </button>
-                <button id="alertConfirmBtn" onclick="closeCustomAlert()" class="px-6 py-2 bg-grokBlue hover:bg-grokBlue/90 text-white rounded-xl text-sm font-semibold transition">
-                    OK
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-2"></div>
 
+    <!-- JS Logic and Simulations -->
     <script>
-        // Set hardcoded API key provided in system command instruction
-        const DEFAULT_API_KEY = "xai-7zTWbKQqNOkZe8FJMwf84sWmYAElxfRTXBKK4XQ7X1RedRSboYY262Ijz28NujEoKoI728kVL4UorMp8";
+        // ----------------------------------------------------
+        // INITIAL DATA & STATE
+        // ----------------------------------------------------
+        let customApiKey = "";
+        let isRealApiEnabled = false;
 
-        // Global State Tree
-        let appState = {
-            apiKey: localStorage.getItem('grok_api_key') || DEFAULT_API_KEY,
-            corsProxy: localStorage.getItem('grok_cors_proxy') || 'direct',
-            grokMode: 'regular', // 'regular' or 'fun'
-            conversations: JSON.parse(localStorage.getItem('grok_conversations')) || [],
-            activeConversationId: localStorage.getItem('grok_active_convo_id') || null,
-            isGenerating: false,
-            attachedImageBase64: null,
-            recognition: null,
-            isRecording: false
+        // Daily Tracker Limits
+        let dailyRequestsCount = 0;
+        let minuteRequestsCount = 0;
+        let minuteInterval = null;
+
+        // Cumulative Token and Cost Counters
+        let inputTokensSum = 0;
+        let outputTokensSum = 0;
+        let deepseekCostSum = 0.0;
+        let geminiCostSum = 0.0;
+
+        // Default Staff Data
+        const defaultStaff = [
+            { id: 1, name: "Heang", role: "Cashier", dayOff: "ថ្ងៃអង្គារ", checkIn: "08:02 AM", status: "Late" },
+            { id: 2, name: "Thida", role: "Sales", dayOff: "ថ្ងៃពុធ", checkIn: "07:55 AM", status: "On Time" },
+            { id: 3, name: "Borey", role: "Barista", dayOff: "ថ្ងៃព្រហស្បតិ៍", checkIn: "08:15 AM", status: "Late" },
+            { id: 4, name: "Dara", role: "Cleaner", dayOff: "ថ្ងៃច័ន្ទ", checkIn: "07:45 AM", status: "On Time" },
+            { id: 5, name: "Sophy", role: "Chef", dayOff: "ថ្ងៃសុក្រ", checkIn: "07:50 AM", status: "On Time" },
+            { id: 6, name: "Neary", role: "Supervisor", dayOff: "ថ្ងៃអាទិត្យ", checkIn: "08:00 AM", status: "On Time" },
+            { id: 7, name: "Seyha", role: "Security", dayOff: "ថ្ងៃសៅរ៍", checkIn: "07:30 AM", status: "On Time" }
+        ];
+
+        let staffData = JSON.parse(JSON.stringify(defaultStaff));
+
+        // On Load Trigger
+        window.onload = function() {
+            lucide.createIcons();
+            renderStaffList();
+            setupMinuteTimer();
         };
 
-        // Initialize App on DOM Loaded
-        window.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            
-            // Check if key is already stored, otherwise store default
-            if (!localStorage.getItem('grok_api_key')) {
-                localStorage.setItem('grok_api_key', DEFAULT_API_KEY);
-            }
+        // ----------------------------------------------------
+        // TIMERS & LIMIT TRACERS
+        // ----------------------------------------------------
+        function setupMinuteTimer() {
+            if (minuteInterval) clearInterval(minuteInterval);
+            minuteInterval = setInterval(() => {
+                minuteRequestsCount = 0;
+                updatePricingStats();
+            }, 60000); // Reset minute request every 60s
+        }
 
-            // Sync forms with variables
-            document.getElementById('apiKeyInput').value = appState.apiKey;
-            document.getElementById('corsProxySelect').value = appState.corsProxy;
+        // ----------------------------------------------------
+        // UI INTERACTION: TABS & MODALS
+        // ----------------------------------------------------
+        function switchTab(tabName) {
+            const tabStaff = document.getElementById('tab-staff');
+            const tabPricing = document.getElementById('tab-pricing');
+            const btnStaff = document.getElementById('btn-tab-staff');
+            const btnPricing = document.getElementById('btn-tab-pricing');
 
-            // Generate initial conversation context if history is empty
-            if (appState.conversations.length === 0) {
-                createNewConversation();
+            if (tabName === 'staff') {
+                tabStaff.classList.remove('hidden');
+                tabPricing.classList.add('hidden');
+                btnStaff.className = "flex-1 py-2 text-center text-sm font-bold rounded-lg transition-all bg-blue-600 text-white";
+                btnPricing.className = "flex-1 py-2 text-center text-sm font-bold rounded-lg transition-all text-slate-400 hover:text-white";
             } else {
-                renderConversationsList();
-                loadActiveConversation();
+                tabStaff.classList.add('hidden');
+                tabPricing.classList.remove('hidden');
+                btnStaff.className = "flex-1 py-2 text-center text-sm font-bold rounded-lg transition-all text-slate-400 hover:text-white";
+                btnPricing.className = "flex-1 py-2 text-center text-sm font-bold rounded-lg transition-all bg-blue-600 text-white";
             }
+        }
 
-            // Textarea auto-resize listener
-            const textarea = document.getElementById('userInput');
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
-            });
-
-            // Handle Shift+Enter submission block
-            textarea.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    document.getElementById('chatForm').dispatchEvent(new Event('submit'));
-                }
-            });
-
-            // Initialize Web Speech SpeechRecognition
-            initializeSpeech();
-
-            // Mobile sidebar handles
-            const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebarClose = document.getElementById('sidebarClose');
-            const overlay = document.getElementById('sidebarOverlay');
-
-            const toggleMobileSidebar = () => {
-                sidebar.classList.toggle('-translate-x-full');
-                overlay.classList.toggle('hidden');
-            };
-
-            sidebarToggle.addEventListener('click', toggleMobileSidebar);
-            sidebarClose.addEventListener('click', toggleMobileSidebar);
-            overlay.addEventListener('click', toggleMobileSidebar);
-        });
-
-        // Toggle Settings Modal
-        function toggleSettingsModal() {
-            const modal = document.getElementById('settingsModal');
+        function toggleApiKeyModal() {
+            const modal = document.getElementById('api-modal');
             modal.classList.toggle('hidden');
         }
 
-        // Toggle Password visibility
-        function toggleKeyVisibility() {
-            const input = document.getElementById('apiKeyInput');
-            const icon = document.getElementById('eyeIcon');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.setAttribute('data-lucide', 'eye-off');
-            } else {
-                input.type = 'password';
-                icon.setAttribute('data-lucide', 'eye');
-            }
-            lucide.createIcons();
-        }
-
-        // Save Configuration Changes
-        function saveApiKeySettings() {
-            const keyVal = document.getElementById('apiKeyInput').value.trim();
-            const proxyVal = document.getElementById('corsProxySelect').value;
-
-            if(!keyVal) {
-                showCustomAlert("Authentication Failure", "Please supply a valid xAI Bearer Key.", "error");
-                return;
-            }
-
-            appState.apiKey = keyVal;
-            appState.corsProxy = proxyVal;
-            localStorage.setItem('grok_api_key', keyVal);
-            localStorage.setItem('grok_cors_proxy', proxyVal);
-
-            toggleSettingsModal();
-            showCustomAlert("Settings Saved", "Your updated connection configurations are now active.", "success");
-        }
-
-        // Change Grok system personality modes
-        function setGrokMode(mode) {
-            appState.grokMode = mode;
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
             
-            const btnReg = document.getElementById('btnModeRegular');
-            const btnFun = document.getElementById('btnModeFun');
-            const badge = document.getElementById('grokBadge');
-
-            if (mode === 'regular') {
-                btnReg.className = "px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 bg-white text-black shadow-sm";
-                btnFun.className = "px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 text-neutral-400 hover:text-white";
-                badge.innerText = "Regular";
-                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700 font-normal";
-            } else {
-                btnReg.className = "px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 text-neutral-400 hover:text-white";
-                btnFun.className = "px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 bg-grokFun text-black font-extrabold shadow-sm";
-                badge.innerText = "Fun Mode";
-                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30 font-bold";
-            }
-        }
-
-        // Generate dynamic chat templates on quick click
-        function usePromptChip(text) {
-            const input = document.getElementById('userInput');
-            input.value = text;
-            input.style.height = 'auto';
-            input.style.height = (input.scrollHeight) + 'px';
-            input.focus();
-        }
-
-        // Display Custom Modal Alerts in lieu of raw browser alerts
-        function showCustomAlert(title, message, type = "info", onConfirm = null, showCancel = false) {
-            const alertBox = document.getElementById('customAlert');
-            const titleEl = document.getElementById('alertTitle');
-            const msgEl = document.getElementById('alertMessage');
-            const iconContainer = document.getElementById('alertIconContainer');
-            const cancelBtn = document.getElementById('alertCancelBtn');
-            const confirmBtn = document.getElementById('alertConfirmBtn');
-
-            titleEl.innerText = title;
-            msgEl.innerText = message;
-
-            // Change Colors based on type
-            if (type === "error") {
-                iconContainer.className = "w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-4";
-                iconContainer.innerHTML = `<i data-lucide="alert-triangle" class="w-6 h-6"></i>`;
-            } else if (type === "success") {
-                iconContainer.className = "w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto mb-4";
-                iconContainer.innerHTML = `<i data-lucide="check-circle" class="w-6 h-6"></i>`;
-            } else {
-                iconContainer.className = "w-12 h-12 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto mb-4";
-                iconContainer.innerHTML = `<i data-lucide="info" class="w-6 h-6"></i>`;
-            }
-
-            if (showCancel) {
-                cancelBtn.classList.remove('hidden');
-            } else {
-                cancelBtn.classList.add('hidden');
-            }
-
-            confirmBtn.onclick = () => {
-                alertBox.classList.add('hidden');
-                if (onConfirm) onConfirm();
-            };
-
-            cancelBtn.onclick = () => {
-                alertBox.classList.add('hidden');
-            };
-
-            lucide.createIcons();
-            alertBox.classList.remove('hidden');
-        }
-
-        function closeCustomAlert() {
-            document.getElementById('customAlert').classList.add('hidden');
-        }
-
-        // Trigger Image Dialog Input
-        function triggerFileInput() {
-            document.getElementById('imageInput').click();
-        }
-
-        // Handle Base64 image attachment encoding
-        function handleImageAttachment(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            if (file.size > 1024 * 1024 * 4) { // 4MB restriction
-                showCustomAlert("File limit exceeded", "Please use images smaller than 4MB for faster processing times.", "error");
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                appState.attachedImageBase64 = e.target.result;
-                
-                // Show in UI drawer
-                document.getElementById('attachedImagePreview').src = e.target.result;
-                document.getElementById('imageDrawer').classList.remove('hidden');
-                
-                // Switch to grok-2-vision if not already to prevent execution crash
-                const selectModel = document.getElementById('modelSelect');
-                if (selectModel.value !== 'grok-2-vision-latest') {
-                    selectModel.value = 'grok-2-vision-latest';
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // Remove Attached thumbnail
-        function removeAttachedImage() {
-            appState.attachedImageBase64 = null;
-            document.getElementById('imageInput').value = "";
-            document.getElementById('imageDrawer').classList.add('hidden');
-        }
-
-        // Setup Local History Managers
-        function createNewConversation() {
-            const newId = 'convo_' + Date.now();
-            const newConvo = {
-                id: newId,
-                title: "New Grok Session",
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                messages: []
-            };
-
-            appState.conversations.unshift(newConvo);
-            appState.activeConversationId = newId;
-            saveConversationsToStorage();
+            const bgClass = type === 'success' ? 'bg-emerald-950 border-emerald-500/40 text-emerald-300' : 
+                            type === 'error' ? 'bg-rose-950 border-rose-500/40 text-rose-300' : 
+                            'bg-slate-800 border-slate-700 text-slate-200';
             
-            renderConversationsList();
-            loadActiveConversation();
+            toast.className = `p-3 rounded-xl border text-xs shadow-lg max-w-sm flex items-center gap-2 animate-bounce ${bgClass}`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-triangle' : 'info'}" class="w-4 h-4 shrink-0"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons({attrs: {class: 'w-4 h-4 shrink-0'}});
 
-            // Mobile sidebar hide helper if view starts
-            const sidebar = document.getElementById('sidebar');
-            if(!sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.add('-translate-x-full');
-                document.getElementById('sidebarOverlay').classList.add('hidden');
-            }
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
         }
 
-        function switchConversation(convoId) {
-            appState.activeConversationId = convoId;
-            localStorage.setItem('grok_active_convo_id', convoId);
-            loadActiveConversation();
-            renderConversationsList();
+        // ----------------------------------------------------
+        // DATA MANAGEMENT
+        // ----------------------------------------------------
+        function renderStaffList() {
+            const container = document.getElementById('staff-list-container');
+            container.innerHTML = '';
 
-            // Auto-hide mobile drawers
-            document.getElementById('sidebar').classList.add('-translate-x-full');
-            document.getElementById('sidebarOverlay').classList.add('hidden');
-        }
-
-        function deleteConversation(convoId, event) {
-            event.stopPropagation(); // prevent switching to it while deleting
-            
-            showCustomAlert("Confirm Deletion", "Are you sure you want to scrub this conversation session permanently?", "error", () => {
-                appState.conversations = appState.conversations.filter(c => c.id !== convoId);
-                
-                if (appState.activeConversationId === convoId) {
-                    appState.activeConversationId = appState.conversations.length > 0 ? appState.conversations[0].id : null;
-                }
-
-                if (appState.conversations.length === 0) {
-                    createNewConversation();
-                } else {
-                    saveConversationsToStorage();
-                    renderConversationsList();
-                    loadActiveConversation();
-                }
-            }, true);
-        }
-
-        function confirmClearHistory() {
-            showCustomAlert("Wipe Session Log", "You are about to delete all stored context within the active conversation. Proceed?", "error", () => {
-                const active = appState.conversations.find(c => c.id === appState.activeConversationId);
-                if (active) {
-                    active.messages = [];
-                    active.title = "Cleared Session";
-                    saveConversationsToStorage();
-                    loadActiveConversation();
-                    renderConversationsList();
-                }
-            }, true);
-        }
-
-        function saveConversationsToStorage() {
-            localStorage.setItem('grok_conversations', JSON.stringify(appState.conversations));
-            localStorage.setItem('grok_active_convo_id', appState.activeConversationId);
-        }
-
-        // Render Conversation Sidebar Items
-        function renderConversationsList() {
-            const listEl = document.getElementById('chatHistoryList');
-            listEl.innerHTML = "";
-
-            appState.conversations.forEach(convo => {
-                const isActive = convo.id === appState.activeConversationId;
-                
-                const item = document.createElement('div');
-                item.className = `group flex items-center justify-between px-3 py-2.5 rounded-xl text-xs cursor-pointer transition-all duration-150 ${
-                    isActive 
-                    ? 'bg-neutral-850 border border-neutral-700 bg-neutral-900 text-white font-semibold' 
-                    : 'text-neutral-400 hover:bg-neutral-900 hover:text-white'
-                }`;
-                item.setAttribute('onclick', `switchConversation('${convo.id}')`);
-
-                item.innerHTML = `
-                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                        <i data-lucide="message-square" class="w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-grokBlue' : 'text-neutral-500'}"></i>
-                        <span class="truncate pr-2">${convo.title}</span>
-                    </div>
-                    <div class="flex items-center gap-1.5 flex-shrink-0">
-                        <span class="text-[9px] text-neutral-600 font-mono group-hover:hidden">${convo.timestamp}</span>
-                        <button onclick="deleteConversation('${convo.id}', event)" class="hidden group-hover:block p-1 hover:bg-neutral-800 rounded text-neutral-500 hover:text-rose-400" title="Delete conversation">
-                            <i data-lucide="trash" class="w-3.5 h-3.5"></i>
-                        </button>
-                    </div>
-                `;
-                listEl.appendChild(item);
-            });
-
-            lucide.createIcons();
-        }
-
-        // Loads messages from active conversation into UI Scroll Area
-        function loadActiveConversation() {
-            const active = appState.conversations.find(c => c.id === appState.activeConversationId);
-            const welcome = document.getElementById('welcomeScreen');
-            const messagesTarget = document.getElementById('chatMessages');
-            const tokenCounter = document.getElementById('tokenCounter');
-
-            messagesTarget.innerHTML = "";
-
-            if (!active || active.messages.length === 0) {
-                welcome.classList.remove('hidden');
-                tokenCounter.innerText = "0 msgs";
-                return;
-            }
-
-            welcome.classList.add('hidden');
-            tokenCounter.innerText = `${active.messages.length} msgs`;
-
-            active.messages.forEach((msg, idx) => {
-                if (msg.role === 'system') return; // Skip showing system configuration context
-                
-                const isUser = msg.role === 'user';
-                const container = document.createElement('div');
-                container.className = `flex gap-4 items-start ${isUser ? 'justify-end' : 'justify-start'}`;
-
-                // Process structured images if present
-                let imageHtml = "";
-                let textContent = "";
-
-                if (typeof msg.content === 'object' && Array.isArray(msg.content)) {
-                    msg.content.forEach(part => {
-                        if (part.type === 'text') {
-                            textContent += part.text;
-                        } else if (part.type === 'image_url') {
-                            imageHtml = `<div class="mb-2 max-w-sm rounded-xl overflow-hidden border border-grokBorder">
-                                <img src="${part.image_url.url}" alt="User upload thumbnail" class="max-h-60 object-contain w-full">
-                            </div>`;
-                        }
-                    });
-                } else {
-                    textContent = msg.content;
-                }
-
-                // Parse standard markdown safely via marked.js
-                const rawParsed = marked.parse(textContent);
-
-                const avatar = isUser 
-                    ? `<div class="w-8 h-8 rounded-lg bg-grokBlue text-white flex-shrink-0 flex items-center justify-center font-bold text-xs">U</div>`
-                    : `<div class="w-8 h-8 rounded-lg bg-white text-black flex-shrink-0 flex items-center justify-center font-black text-sm select-none border border-neutral-700">G</div>`;
-
-                container.innerHTML = `
-                    ${!isUser ? avatar : ''}
-                    <div class="flex-1 max-w-[85%] sm:max-w-[75%]">
-                        <div class="flex items-center gap-2 mb-1 justify-between">
-                            <span class="text-[11px] text-neutral-500 font-mono">
-                                ${isUser ? 'You' : 'Grok'} • ${new Date(msg.timestamp || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                            </span>
-                            <div class="flex items-center gap-1.5 opacity-40 hover:opacity-100 transition">
-                                <button onclick="copyMessageToClipboard('${idx}')" class="p-1 hover:bg-neutral-800 rounded text-neutral-400 hover:text-white" title="Copy to clipboard">
-                                    <i data-lucide="copy" class="w-3 h-3"></i>
-                                </button>
-                                ${!isUser ? `
-                                <button onclick="readTextAloud('${idx}')" class="p-1 hover:bg-neutral-800 rounded text-neutral-400 hover:text-white" title="Listen with Text to Speech">
-                                    <i data-lucide="volume-2" class="w-3 h-3"></i>
-                                </button>` : ''}
-                            </div>
+            staffData.forEach((staff, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900/50 hover:bg-slate-900 p-3 rounded-xl border border-slate-700/60 flex flex-col gap-3 transition-colors";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 bg-slate-800 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-400">${index + 1}</span>
+                            <span class="text-xs font-bold text-white">${staff.name}</span>
+                            <span class="text-[10px] bg-blue-950/50 text-blue-300 px-2 py-0.5 rounded border border-blue-900/30">${staff.role}</span>
                         </div>
-                        <div class="p-4 rounded-2xl border ${
-                            isUser 
-                            ? 'bg-neutral-900 border-grokBorder text-white' 
-                            : 'bg-neutral-900/45 border-neutral-800 markdown-body'
-                        }">
-                            ${imageHtml}
-                            <div class="prose prose-invert max-w-none text-sm break-words">${isUser ? textContent : rawParsed}</div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] text-slate-500 font-bold uppercase">ស្ថានភាព៖</span>
+                            <select onchange="updateStaffField(${staff.id}, 'status', this.value)" class="bg-slate-800 text-[10px] text-slate-200 font-bold px-1.5 py-0.5 rounded border border-slate-700 focus:outline-none cursor-pointer">
+                                <option value="On Time" ${staff.status === 'On Time' ? 'selected' : ''}>ទៀងពេល</option>
+                                <option value="Late" ${staff.status === 'Late' ? 'selected' : ''}>យឺត</option>
+                                <option value="Absent" ${staff.status === 'Absent' ? 'selected' : ''}>អវត្តមាន</option>
+                            </select>
                         </div>
                     </div>
-                    ${isUser ? avatar : ''}
+                    <div class="grid grid-cols-2 gap-2 text-[11px]">
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-0.5">ថ្ងៃឈប់សម្រាក (Day Off)</label>
+                            <input type="text" value="${staff.dayOff}" oninput="updateStaffField(${staff.id}, 'dayOff', this.value)" class="w-full bg-slate-800 border border-slate-700/80 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500 mb-0.5">ម៉ោង Check-In</label>
+                            <input type="text" value="${staff.checkIn}" oninput="updateStaffField(${staff.id}, 'checkIn', this.value)" class="w-full bg-slate-800 border border-slate-700/80 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
                 `;
-
-                messagesTarget.appendChild(container);
+                container.appendChild(card);
             });
-
-            // Trigger highlights logic for rendering scripts/languages
-            Prism.highlightAllUnder(messagesTarget);
-
-            // Re-render lucide elements
-            lucide.createIcons();
-
-            // Auto-scroll logic
-            scrollToBottom();
         }
 
-        // Scroll helper
-        function scrollToBottom() {
-            const scroll = document.getElementById('chatScrollArea');
-            scroll.scrollTop = scroll.scrollHeight;
+        function updateStaffField(id, field, value) {
+            const staff = staffData.find(s => s.id === id);
+            if (staff) {
+                staff[field] = value;
+            }
         }
 
-        // Copy Clipboard Helper
-        function copyMessageToClipboard(idx) {
-            const active = appState.conversations.find(c => c.id === appState.activeConversationId);
-            if (!active) return;
+        function resetStaffData() {
+            staffData = JSON.parse(JSON.stringify(defaultStaff));
+            renderStaffList();
+            showToast("ទិន្នន័យត្រូវបានកំណត់ឡើងវិញ!", "success");
+        }
 
-            let textToCopy = "";
-            const msg = active.messages[idx];
+        // ----------------------------------------------------
+        // MOCKED API KEY LOGIC
+        // ----------------------------------------------------
+        function saveApiKey() {
+            const key = document.getElementById('txt-api-key').value.trim();
+            if (!key) {
+                showToast("សូមវាយបញ្ចូល API Key ឱ្យបានត្រឹមត្រូវ!", "error");
+                return;
+            }
+            customApiKey = key;
+            isRealApiEnabled = true;
+            document.getElementById('lbl-api-mode').innerText = "Real Gemini Live Mode";
+            document.getElementById('lbl-api-mode').className = "text-emerald-400 font-bold animate-pulse";
+            showToast("បានភ្ជាប់ API Key របស់ Gemini ដោយជោគជ័យ!", "success");
+            toggleApiKeyModal();
+        }
 
-            if (typeof msg.content === 'object' && Array.isArray(msg.content)) {
-                const textPart = msg.content.find(p => p.type === 'text');
-                textToCopy = textPart ? textPart.text : "";
+        function disableRealApi() {
+            customApiKey = "";
+            isRealApiEnabled = false;
+            document.getElementById('txt-api-key').value = "";
+            document.getElementById('lbl-api-mode').innerText = "Mock Mode (ឥតគិតថ្លៃ)";
+            document.getElementById('lbl-api-mode').className = "text-amber-500 font-bold";
+            showToast("បានត្រឡប់មកកាន់ Mock Mode វិញ", "info");
+            toggleApiKeyModal();
+        }
+
+        // ----------------------------------------------------
+        // PRICING & TOKENS ENGINE
+        // ----------------------------------------------------
+        function estimateTokens(text) {
+            let englishWords = text.match(/[a-zA-Z]+/g) || [];
+            let khmerChars = text.replace(/[a-zA-Z0-9\s]/g, "") || "";
+            
+            let est = Math.ceil((englishWords.length * 1.3) + (khmerChars.length * 1.5));
+            return est < 4 ? 4 : est;
+        }
+
+        function updatePricingStats() {
+            document.getElementById('total-input-tokens').innerText = inputTokensSum.toLocaleString();
+            document.getElementById('total-output-tokens').innerText = outputTokensSum.toLocaleString();
+
+            // Calculate costs based on Deepseek Flash V4 & Gemini 2.5 Flash
+            // Deepseek: Input: $0.14/1M, Output: $0.28/1M
+            let dsInCost = (inputTokensSum / 1000000) * 0.14;
+            let dsOutCost = (outputTokensSum / 1000000) * 0.28;
+            deepseekCostSum = dsInCost + dsOutCost;
+
+            // Gemini 2.5 Flash: Input: $0.075/1M, Output: $0.30/1M
+            let gemInCost = (inputTokensSum / 1000000) * 0.075;
+            let gemOutCost = (outputTokensSum / 1000000) * 0.30;
+            geminiCostSum = gemInCost + gemOutCost;
+
+            document.getElementById('cost-deepseek').innerText = `$${deepseekCostSum.toFixed(6)}`;
+            document.getElementById('cost-gemini').innerText = `$${geminiCostSum.toFixed(6)}`;
+
+            // Update Free Tier Dashboard Values
+            document.getElementById('lbl-request-daily').innerText = `${dailyRequestsCount} / 1,000`;
+            let dailyPct = Math.min((dailyRequestsCount / 1000) * 100, 100);
+            document.getElementById('bar-request-daily').style.width = `${dailyPct}%`;
+
+            document.getElementById('lbl-request-minute').innerText = `${minuteRequestsCount} / 15`;
+            let minPct = Math.min((minuteRequestsCount / 15) * 100, 100);
+            document.getElementById('bar-request-minute').style.width = `${minPct}%`;
+        }
+
+        // ----------------------------------------------------
+        // CONTEXT BUILDER (UPDATED: SUPPORT FOR GENERAL KNOWLEDGE)
+        // ----------------------------------------------------
+        function buildSystemPrompt() {
+            let header = "អ្នកគឺជាជំនួយការឆ្លាតវៃសកល (Global and HR Assistant) នៅក្នុងគ្រុប Telegram របស់ហាង។ " +
+                         "អ្នកមានសមត្ថភាពពីរយ៉ាងសំខាន់៖\n" +
+                         "១. ឆ្លើយសំណួរអំពីទិន្នន័យបុគ្គលិក៖ ប្រសិនបើសំណួរពាក់ព័ន្ធនឹងវត្តមាន ម៉ោង Check-in ឬថ្ងៃឈប់សម្រាករបស់បុគ្គលិកក្នុងហាង ចូរប្រើទិន្នន័យនៅក្នុង Database ខាងក្រោមនេះដើម្បីឆ្លើយតប។\n" +
+                         "២. ឆ្លើយសំណួរទូទៅ (General Knowledge)៖ ប្រសិនបើសំណួរជាសំណួរទូទៅ (ចំណេះដឹងទូទៅ គណិតវិទ្យា ប្រវត្តិសាស្ត្រ បកប្រែភាសា ការសរសេរលិខិត ការសរសេរកូដ...) ដែលគ្មានទាក់ទងនឹងហាង ចូរឆ្លើយតបដោយប្រើប្រាស់ចំណេះដឹងទូទៅដ៏ធំទូលាយរបស់អ្នកចុះ។\n\n" +
+                         "ខាងក្រោមនេះជាតារាងទិន្នន័យពិតនៃបុគ្គលិកទាំង ៧ នាក់នាពេលបច្ចុប្បន្នចេញពីប្រព័ន្ធ Check-in របស់យើង៖\n\n";
+            
+            let dataBody = staffData.map((s, i) => {
+                return `${i+1}. ឈ្មោះ: ${s.name}, តួនាទី: ${s.role}, ថ្ងៃសម្រាក (Day-off): ${s.dayOff}, ម៉ោង Check-in ថ្ងៃនេះ: ${s.checkIn}, ស្ថានភាព៖ ${s.status === 'On Time' ? 'ចូលធ្វើការទាន់ពេល' : s.status === 'Late' ? 'ចូលធ្វើការយឺតយ៉ាវ' : 'អវត្តមាន'}`;
+            }).join("\n");
+
+            let rules = "\n\nច្បាប់ក្នុងការឆ្លើយតបជានិច្ច៖\n" +
+                        "1. ត្រូវឆ្លើយតបជាភាសាខ្មែរ ដោយភាពរាក់ទាក់ សាមញ្ញ គួរសម និងងាយយល់បំផុត។\n" +
+                        "2. សម្រាប់សំណួរទូទៅ៖ ចូរឆ្លើយឱ្យបានត្រឹមត្រូវ និងទូលំទូលាយតាមការគួរ (កុំនិយាយថា 'ខ្ញុំមិនដឹង' ដោយសារតែគ្មានក្នុងទិន្នន័យបុគ្គលិកឡើយ)។\n" +
+                        "3. សម្រាប់សំណួរទាក់ទងនឹងទិន្នន័យសម្ងាត់បុគ្គលិកដែលគ្មានចែងខាងលើ (ដូចជាលេខកាត លេខទូរស័ព្ទ ប្រាក់ខែផ្ទាល់ខ្លួន) ត្រូវណែនាំឱ្យពួកគេសួរទៅកាន់ Admin ឬ HR ផ្ទាល់។";
+
+            return header + dataBody + rules;
+        }
+
+        // ----------------------------------------------------
+        // INTELLIGENT MOCK AI RESPONSE GENERATOR
+        // ----------------------------------------------------
+        function generateMockResponse(userInput) {
+            let inputLower = userInput.toLowerCase();
+            let response = "";
+
+            // Keywords matching for simulated responses
+            let matchedStaff = staffData.find(s => inputLower.includes(s.name.toLowerCase()));
+            
+            if (matchedStaff) {
+                // System-specific questions about staff
+                if (inputLower.includes("dayoff") || inputLower.includes("day-off") || inputLower.includes("ឈប់") || inputLower.includes("សម្រាក")) {
+                    response = `បាទ! សម្រាប់បុគ្គលិកឈ្មោះ **${matchedStaff.name}** (តួនាទី: ${matchedStaff.role}) គឺគាត់មានថ្ងៃឈប់សម្រាក (Day-off) នៅ **${matchedStaff.dayOff}** បាទ។`;
+                } else if (inputLower.includes("checkin") || inputLower.includes("check in") || inputLower.includes("ម៉ោង") || inputLower.includes("វត្តមាន") || inputLower.includes("ម៉ោងចូល")) {
+                    let statusKhmer = matchedStaff.status === 'On Time' ? 'ទាន់ពេលធម្មតា' : matchedStaff.status === 'Late' ? 'យឺតយ៉ាវបន្តិច' : 'អវត្តមាន';
+                    response = `បាទ! ថ្ងៃនេះ **${matchedStaff.name}** គាត់បានចូលរួមការងារនៅម៉ោង **${matchedStaff.checkIn}** (ស្ថានភាព៖ **${statusKhmer}**) បាទ។`;
+                } else {
+                    response = `បាទ! នេះជាព័ត៌មានរបស់ **${matchedStaff.name}** នៅក្នុងប្រព័ន្ធ៖\n• តួនាទី៖ ${matchedStaff.role}\n• ថ្ងៃសម្រាក៖ ${matchedStaff.dayOff}\n• វត្តមានថ្ងៃនេះ៖ ${matchedStaff.checkIn} (${matchedStaff.status === 'On Time' ? 'ទាន់ពេល' : matchedStaff.status === 'Late' ? 'យឺត' : 'អវត្តមាន'})។`;
+                }
+            } else if (inputLower.includes("យឺត") || inputLower.includes("late")) {
+                let lateStaffs = staffData.filter(s => s.status === 'Late').map(s => `• **${s.name}** (ម៉ោង ${s.checkIn})`);
+                if (lateStaffs.length > 0) {
+                    response = `បាទ! ថ្ងៃនេះមានបុគ្គលិក **${lateStaffs.length} នាក់** ដែលបានចូលយឺត៖\n${lateStaffs.join("\n")}`;
+                } else {
+                    response = `អបអរសាទរ! ថ្ងៃនេះមិនមានបុគ្គលិកណាម្នាក់មកធ្វើការយឺតយ៉ាវនោះទេ គ្រប់គ្នាចូលបម្រើការងារទាន់ពេលល្អណាស់បាទ។`;
+                }
+            } else if (inputLower.includes("អវត្តមាន") || inputLower.includes("absent") || inputLower.includes("ឈប់ថ្ងៃនេះ")) {
+                let absentStaffs = staffData.filter(s => s.status === 'Absent').map(s => `• **${s.name}**`);
+                if (absentStaffs.length > 0) {
+                    response = `បាទ! ថ្ងៃនេះមានបុគ្គលិកអវត្តមាន **${absentStaffs.length} នាក់**៖\n${absentStaffs.join("\n")}`;
+                } else {
+                    response = `បាទ! ថ្ងៃនេះបុគ្គលិកទាំងអស់មកបំពេញការងារគ្រប់ៗគ្នា មិនមាននរណាម្នាក់អវត្តមានឡើយបាទ។`;
+                }
+            } else if (inputLower.includes("សរុប") || inputLower.includes("summary") || inputLower.includes("ទាំងអស់")) {
+                let onTimeCount = staffData.filter(s => s.status === 'On Time').length;
+                let lateCount = staffData.filter(s => s.status === 'Late').length;
+                let absentCount = staffData.filter(s => s.status === 'Absent').length;
+
+                response = `បាទ! ខ្ញុំសូមផ្ដល់ជូនរបាយការណ៍សង្ខេបពីវត្តមានរបស់បុគ្គលិកទាំង ៧ នាក់នាថ្ងៃនេះ៖\n\n` +
+                           `• មកទាន់ពេល៖ **${onTimeCount} នាក់**\n` +
+                           `• មកយឺតយ៉ាវ៖ **${lateCount} នាក់**\n` +
+                           `• អវត្តមាន៖ **${absentCount} នាក់**\n\n` +
+                           `តើអ្នកចង់ឱ្យខ្ញុំជួយពិនិត្យលើបុគ្គលិកជាក់លាក់ណាម្នាក់បន្ថែមដែរឬទេ?`;
             } else {
-                textToCopy = msg.content;
+                // General knowledge simulation (when API key is not connected)
+                if (inputLower.includes("រាជធានី") || inputLower.includes("capital") || inputLower.includes("ភ្នំពេញ")) {
+                    response = `[ឆ្លើយតបតាមចំណេះដឹងទូទៅ]៖ បាទ! រាជធានីភ្នំពេញ គឺជាបេះដូង និងជារាជធានីនៃ **ព្រះរាជាណាចក្រកម្ពុជា** បាទ។ វាជាមជ្ឈមណ្ឌលសេដ្ឋកិច្ច នយោបាយ និងវប្បធម៌ដ៏សំខាន់បំផុតរបស់ប្រទេស។`;
+                } else if (inputLower.includes("លិខិត") || inputLower.includes("សុំច្បាប់") || inputLower.includes("សម្រាកព្យាបាល")) {
+                    response = `[ឆ្លើយតបតាមចំណេះដឹងទូទៅ]៖ បាទ! នេះជាគំរូលិខិតសុំច្បាប់សម្រាកព្យាបាលជំងឺខ្លីមួយ៖\n\n` +
+                               `**កម្មវត្ថុ៖ លិខិតសុំច្បាប់សម្រាកព្យាបាលជំងឺ**\n` +
+                               `សូមជម្រាបជូន៖ បងប្រធានគ្រប់គ្រងហាង\n` +
+                               `ខ្ញុំបាទ/នាងខ្ញុំ សូមសុំច្បាប់ឈប់សម្រាកចំនួន ១ថ្ងៃ (ថ្ងៃនេះ) ផ្អាកការងារដោយសារមានបញ្ហាសុខភាព (គ្រុនក្ដៅ) ត្រូវសម្រាកព្យាបាល។ ខ្ញុំនឹងចូលមកបំពេញការងារវិញភ្លាមក្រោយពេលធូរស្បើយ។\n\n` +
+                               `សូមបងប្រធានទទួលយកការសុំច្បាប់នេះដោយក្តីអនុគ្រោះ។`;
+                } else if (inputLower.includes("translate") || inputLower.includes("បកប្រែ") || inputLower.includes("english")) {
+                    response = `[ឆ្លើយតបតាមចំណេះដឹងទូទៅ]៖ បាទ! ឃ្លា 'ខ្ញុំស្រឡាញ់ប្រទេសកម្ពុជា' បកប្រែជាភាសាអង់គ្លេសគឺ៖ \n👉 **"I love Cambodia."** ឬ **"I love the Kingdom of Cambodia."** បាទ!`;
+                } else {
+                    response = `[ឆ្លើយតបតាមចំណេះដឹងទូទៅ]៖ បាទ! ខ្ញុំបានទទួលសំណួរទូទៅរបស់អ្នកហើយ។ \n\n*ដើម្បីទទួលបានចម្លើយឆ្លាតវៃ និងលម្អិតពិតប្រាកដសម្រាប់សំណួរទូទៅនេះ សូមភ្ជាប់ **Gemini API Key** របស់អ្នកនៅផ្នែកខាងលើ ដើម្បីឱ្យប្រព័ន្ធដំណើរការឆ្លើយតបតាម AI ពិតប្រាកដជាភាសាខ្មែរបានយ៉ាងត្រឹមត្រូវបំផុត!*`;
+                }
             }
 
-            // Standard fallback compliance using execCommand
-            const tempTextarea = document.createElement("textarea");
-            tempTextarea.value = textToCopy;
-            document.body.appendChild(tempTextarea);
-            tempTextarea.select();
+            return response;
+        }
+
+        // ----------------------------------------------------
+        // CHAT INTERACTION & LIVE CALLS TO GEMINI
+        // ----------------------------------------------------
+        function handleInputKeydown(event) {
+            if (event.key === "Enter") {
+                sendChatMessage();
+            }
+        }
+
+        function clickSampleQuestion(question) {
+            document.getElementById('chat-input').value = question;
+            sendChatMessage();
+        }
+
+        function clearChat() {
+            const container = document.getElementById('chat-messages-container');
+            container.innerHTML = `
+                <div class="flex justify-center my-2">
+                    <span class="bg-slate-800/80 text-slate-300 text-[10px] px-3.5 py-1.5 rounded-full border border-slate-700/50 text-center leading-relaxed">
+                        🗑️ ការសន្ទនាត្រូវបានសម្អាតឡើងវិញ។
+                    </span>
+                </div>
+            `;
+            showToast("បានលុបការសន្ទនាក្នុងគ្រុបជោគជ័យ", "info");
+        }
+
+        async function sendChatMessage() {
+            const inputField = document.getElementById('chat-input');
+            const senderSelect = document.getElementById('sender-select');
+            
+            const messageText = inputField.value.trim();
+            const senderName = senderSelect.value;
+
+            if (!messageText) return;
+
+            inputField.value = "";
+            appendMessage(senderName, messageText, "user");
+
+            if (!messageText.startsWith("/ai")) {
+                setTimeout(() => {
+                    appendMessage("Bot", "⚠️ ខ្ញុំឆ្លើយតែសំណួរណាដែលមានបញ្ជា `/ai` ពីមុខប៉ុណ្ណោះបាទ! ឧទហរណ៍៖ `/ai Heang ឈប់សម្រាកថ្ងៃណា?` ឬ `/ai តើភ្នំពេញជារាជធានីនៃប្រទេសណា?`", "bot-warning");
+                }, 800);
+                return;
+            }
+
+            const realQuestion = messageText.replace(/^\/ai\s*/i, "").trim();
+            if (!realQuestion) {
+                setTimeout(() => {
+                    appendMessage("Bot", "សូមវាយបញ្ចូលសំណួររបស់អ្នកបន្ទាប់ពីពាក្យបញ្ជា `/ai` បាទ។", "bot-warning");
+                }, 800);
+                return;
+            }
+
+            dailyRequestsCount++;
+            minuteRequestsCount++;
+
+            if (minuteRequestsCount > 15) {
+                showToast("ល្បឿនសួរលឿនពេកហើយ! (Rate limit 15 requests/min ត្រូវបានប៉ះពាល់)", "error");
+                appendMessage("Bot", "❌ សុំទោសបាទ! ប្រព័ន្ធដាច់ការតភ្ជាប់បណ្តោះអាសន្នដោយសារការសួរលឿនពេក (Rate Limit Exceeded - 15RPM)។ សូមរង់ចាំ ១ នាទីទើបអាចសួរម្តងទៀតបាន។", "bot-error");
+                updatePricingStats();
+                return;
+            }
+
+            const systemPrompt = buildSystemPrompt();
+            const inputTokens = estimateTokens(systemPrompt + realQuestion);
+            inputTokensSum += inputTokens;
+            updatePricingStats();
+
+            const typingId = appendTypingIndicator();
+
             try {
-                document.execCommand("copy");
-                showCustomAlert("Success", "Copied text content to clipboard.", "success");
+                let botResponseText = "";
+                let outputTokens = 0;
+
+                if (isRealApiEnabled && customApiKey) {
+                    // LIVE CALL TO REAL GEMINI 2.5 FLASH
+                    botResponseText = await callRealGeminiAPI(systemPrompt, realQuestion);
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    botResponseText = generateMockResponse(realQuestion);
+                }
+
+                removeTypingIndicator(typingId);
+
+                outputTokens = estimateTokens(botResponseText);
+                outputTokensSum += outputTokens;
+
+                appendMessage("Bot", botResponseText, "bot");
+                updatePricingStats();
+
             } catch (err) {
-                console.error("Copy operation unsuccessful", err);
+                removeTypingIndicator(typingId);
+                appendMessage("Bot", `❌ Error: ${err.message}`, "bot-error");
+                showToast("ការហៅទៅ AI ជួបបញ្ហា!", "error");
             }
-            document.body.removeChild(tempTextarea);
         }
 
-        // Text to Speech Voice Feedback using browser speech synthesis
-        function readTextAloud(idx) {
-            const active = appState.conversations.find(c => c.id === appState.activeConversationId);
-            if (!active) return;
+        // ----------------------------------------------------
+        // COMPONENT RENDERERS
+        // ----------------------------------------------------
+        function appendMessage(sender, text, role) {
+            const container = document.getElementById('chat-messages-container');
+            const messageDiv = document.createElement('div');
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            const msg = active.messages[idx];
-            let text = "";
-
-            if (typeof msg.content === 'object' && Array.isArray(msg.content)) {
-                text = msg.content.find(p => p.type === 'text')?.text || "";
+            if (role === 'user') {
+                messageDiv.className = "flex justify-end max-w-[85%] ml-auto";
+                messageDiv.innerHTML = `
+                    <div class="bg-sky-600 text-white p-3 rounded-2xl rounded-tr-none shadow text-xs leading-relaxed space-y-1">
+                        <div class="font-bold text-[10px] text-sky-200">បុគ្គលិក៖ ${sender}</div>
+                        <p class="whitespace-pre-wrap">${escapeHTML(text)}</p>
+                        <div class="text-[9px] text-sky-200 text-right pt-0.5">${timeStr}</div>
+                    </div>
+                `;
+            } else if (role === 'bot') {
+                messageDiv.className = "flex items-start gap-2.5 max-w-[85%]";
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0 text-white shadow-md">
+                        <i data-lucide="bot" class="w-4 h-4"></i>
+                    </div>
+                    <div class="bg-slate-800 text-slate-200 p-3 rounded-2xl rounded-tl-none border border-slate-700 text-xs leading-relaxed space-y-1">
+                        <div class="font-bold text-sky-400 text-[10px]">ជំនួយការ AI (Bot)</div>
+                        <p class="whitespace-pre-wrap">${escapeHTML(text)}</p>
+                        <div class="text-[9px] text-slate-400 text-right pt-0.5">${timeStr}</div>
+                    </div>
+                `;
+            } else if (role === 'bot-warning') {
+                messageDiv.className = "flex justify-center my-1";
+                messageDiv.innerHTML = `
+                    <span class="bg-amber-950/40 text-amber-300 text-[10px] px-3.5 py-1.5 rounded-full border border-amber-500/20 text-center leading-relaxed max-w-[85%]">
+                        ${escapeHTML(text)}
+                    </span>
+                `;
             } else {
-                text = msg.content;
+                messageDiv.className = "flex items-start gap-2.5 max-w-[85%]";
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 bg-rose-600 rounded-full flex items-center justify-center shrink-0 text-white shadow">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                    </div>
+                    <div class="bg-rose-950/30 text-rose-200 p-3 rounded-2xl rounded-tl-none border border-rose-500/20 text-xs leading-relaxed space-y-1">
+                        <div class="font-bold text-rose-400 text-[10px]">ប្រព័ន្ធជួបបញ្ហា</div>
+                        <p class="whitespace-pre-wrap">${escapeHTML(text)}</p>
+                        <div class="text-[9px] text-slate-500 text-right pt-0.5">${timeStr}</div>
+                    </div>
+                `;
             }
 
-            if ('speechSynthesis' in window) {
-                // Cancel existing spoken phrases
-                window.speechSynthesis.cancel();
-                
-                const utterance = new SpeechSynthesisUtterance(text);
-                
-                // Fine-tune speech dynamics to sound a bit more metallic/Grok-like
-                utterance.pitch = 0.95; 
-                utterance.rate = 1.05;
-
-                window.speechSynthesis.speak(utterance);
-            } else {
-                showCustomAlert("Unsupported", "Text to Speech is not supported on this browser version.", "info");
-            }
+            container.appendChild(messageDiv);
+            lucide.createIcons({attrs: {class: 'w-4 h-4'}});
+            scrollChatToBottom();
         }
 
-        // Web Speech API Voice Recognition (STT) Setup
-        function initializeSpeech() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                document.getElementById('btnMic').style.display = 'none';
-                return;
-            }
-
-            appState.recognition = new SpeechRecognition();
-            appState.recognition.continuous = false;
-            appState.recognition.interimResults = false;
-            appState.recognition.lang = 'en-US';
-
-            appState.recognition.onstart = () => {
-                appState.isRecording = true;
-                const micIcon = document.getElementById('micIcon');
-                micIcon.className = "w-5 h-5 text-rose-500 animate-pulse";
-                document.getElementById('userInput').placeholder = "Listening attentively...";
-            };
-
-            appState.recognition.onresult = (event) => {
-                const resultText = event.results[0][0].transcript;
-                const input = document.getElementById('userInput');
-                input.value += (input.value ? ' ' : '') + resultText;
-                input.style.height = 'auto';
-                input.style.height = (input.scrollHeight) + 'px';
-            };
-
-            appState.recognition.onerror = (event) => {
-                console.error("Speech Recognition Error", event.error);
-                appState.isRecording = false;
-                resetMicUi();
-            };
-
-            appState.recognition.onend = () => {
-                appState.isRecording = false;
-                resetMicUi();
-            };
+        function appendTypingIndicator() {
+            const container = document.getElementById('chat-messages-container');
+            const id = "typing-" + Date.now();
+            const messageDiv = document.createElement('div');
+            messageDiv.id = id;
+            messageDiv.className = "flex items-start gap-2.5 max-w-[85%] animate-pulse";
+            messageDiv.innerHTML = `
+                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0 text-white">
+                    <i data-lucide="bot" class="w-4 h-4"></i>
+                </div>
+                <div class="bg-slate-800 text-slate-400 p-3 rounded-2xl rounded-tl-none border border-slate-700 text-xs flex items-center gap-1.5">
+                    <span>AI កំពុងគិត និងវិភាគ...</span>
+                    <span class="flex gap-1">
+                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.3s"></span>
+                    </span>
+                </div>
+            `;
+            container.appendChild(messageDiv);
+            lucide.createIcons({attrs: {class: 'w-4 h-4'}});
+            scrollChatToBottom();
+            return id;
         }
 
-        function toggleSpeechRecognition() {
-            if (!appState.recognition) return;
-
-            if (appState.isRecording) {
-                appState.recognition.stop();
-            } else {
-                appState.recognition.start();
-            }
+        function removeTypingIndicator(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
         }
 
-        function resetMicUi() {
-            const micIcon = document.getElementById('micIcon');
-            micIcon.className = "w-5 h-5 text-neutral-400";
-            document.getElementById('userInput').placeholder = "Ask Grok anything...";
+        function scrollChatToBottom() {
+            const container = document.getElementById('chat-messages-container');
+            container.scrollTop = container.scrollHeight;
         }
 
-        // Primary chat workflow Submission Handler
-        async function handleChatSubmit(event) {
-            event.preventDefault();
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
 
-            if (appState.isGenerating) return;
-
-            const inputElement = document.getElementById('userInput');
-            const promptText = inputElement.value.trim();
-
-            if (!promptText && !appState.attachedImageBase64) {
-                return;
-            }
-
-            if (!appState.apiKey) {
-                toggleSettingsModal();
-                showCustomAlert("Authentication Required", "Please configure your xAI API Key inside Settings first.", "error");
-                return;
-            }
-
-            // Build structural user block payload
-            let messageContent;
-            if (appState.attachedImageBase64) {
-                messageContent = [
-                    { type: "text", text: promptText },
-                    { type: "image_url", image_url: { url: appState.attachedImageBase64 } }
-                ];
-            } else {
-                messageContent = promptText;
-            }
-
-            const newUserMessage = {
-                role: 'user',
-                content: messageContent,
-                timestamp: new Date().toISOString()
-            };
-
-            // Get current convo
-            const currentConvo = appState.conversations.find(c => c.id === appState.activeConversationId);
-            if (!currentConvo) return;
-
-            // Push message to local memory
-            currentConvo.messages.push(newUserMessage);
-
-            // Update convo title if it was default
-            if (currentConvo.title === "New Grok Session" || currentConvo.title === "Cleared Session") {
-                currentConvo.title = promptText.length > 28 ? promptText.slice(0, 25) + '...' : promptText;
-            }
-
-            // Cleanup inputs and refresh view immediately
-            inputElement.value = "";
-            inputElement.style.height = '40px';
-            removeAttachedImage();
+        // ----------------------------------------------------
+        // LIVE API CALL
+        // ----------------------------------------------------
+        async function callRealGeminiAPI(systemPrompt, userQuery) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${customApiKey}`;
             
-            saveConversationsToStorage();
-            renderConversationsList();
-            loadActiveConversation();
+            const payload = {
+                contents: [
+                    { 
+                        parts: [
+                            { text: userQuery }
+                        ] 
+                    }
+                ],
+                systemInstruction: {
+                    parts: [
+                        { text: systemPrompt }
+                    ]
+                }
+            };
 
-            // Set system prompt parameters based on chosen mode
-            const activeModel = document.getElementById('modelSelect').value;
-            let systemPromptText = "You are Grok, a highly advanced artificial intelligence model developed by xAI.";
-            
-            if (appState.grokMode === 'fun') {
-                systemPromptText += " Modeled after the Hitchhiker's Guide to the Galaxy, you possess a playful, witty, and rebellious streak. You have a touch of attitude and humor! Answer all user queries accordingly, providing accurate info but always with a smart and funny edge.";
-            } else {
-                systemPromptText += " Provide direct, factual, detailed, objective, and intellectually honest answers. Avoid ungrounded speculation or unnecessary fluff.";
-            }
+            let delay = 1000;
+            const maxRetries = 5;
 
-            // Setup loading UX status
-            appState.isGenerating = true;
-            document.getElementById('loadingIndicator').classList.remove('hidden');
-            scrollToBottom();
-
-            // Perform REST Request towards x.ai api endpoints
-            try {
-                // Ensure correct history structures
-                const apiHistory = [];
-                
-                // Add System instruction context manually inside history
-                apiHistory.push({ role: "system", content: systemPromptText });
-
-                // Format entire dialog sequence cleanly for api validation rules
-                currentConvo.messages.forEach(msg => {
-                    apiHistory.push({
-                        role: msg.role,
-                        content: msg.content
-                    });
-                });
-
-                const payload = {
-                    model: activeModel,
-                    messages: apiHistory,
-                    stream: false,
-                    temperature: appState.grokMode === 'fun' ? 0.85 : 0.6
-                };
-
-                let response;
-                const requestHeaders = {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${appState.apiKey}`
-                };
-
-                const url = "https://api.x.ai/v1/chat/completions";
-
-                // Handle routing based on Proxy configs if CORS block occurs
-                if (appState.corsProxy === 'allorigins') {
-                    const encodedUrl = encodeURIComponent(url);
-                    response = await fetch(`https://api.allorigins.win/raw?url=${encodedUrl}`, {
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    const response = await fetch(url, {
                         method: 'POST',
-                        headers: requestHeaders,
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                } else {
-                    response = await fetch(url, {
-                        method: 'POST',
-                        headers: requestHeaders,
-                        body: JSON.stringify(payload)
-                    });
+
+                    if (!response.ok) {
+                        const errText = await response.text();
+                        throw new Error(`API returned ${response.status}: ${errText}`);
+                    }
+
+                    const result = await response.json();
+                    const aiText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    
+                    if (aiText) {
+                        return aiText;
+                    } else {
+                        throw new Error("មិនទទួលបានចម្លើយត្រឹមត្រូវពីប្រព័ន្ធ AI!");
+                    }
+
+                } catch (error) {
+                    if (attempt === maxRetries) {
+                        throw new Error(`មិនអាចភ្ជាប់ទៅកាន់ AI បានទេ៖ ${error.message}`);
+                    }
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
                 }
-
-                if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    const errMsg = errData.error?.message || `HTTP code ${response.status}`;
-                    throw new Error(errMsg);
-                }
-
-                const data = await response.json();
-                const grokOutput = data.choices?.[0]?.message?.content || "No message returned from API.";
-
-                // Inject response into local conversation history tree
-                currentConvo.messages.push({
-                    role: 'assistant',
-                    content: grokOutput,
-                    timestamp: new Date().toISOString()
-                });
-
-                saveConversationsToStorage();
-                loadActiveConversation();
-
-            } catch (error) {
-                console.error(error);
-                showCustomAlert(
-                    "Connection / API Issue", 
-                    `${error.message}. (Tip: If you run into CORS errors, switch the CORS workaround to "Proxy via AllOrigins" in Settings).`, 
-                    "error"
-                );
-            } finally {
-                appState.isGenerating = false;
-                document.getElementById('loadingIndicator').classList.add('hidden');
-                scrollToBottom();
             }
         }
     </script>
 </body>
 </html>
-
-```
